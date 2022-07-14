@@ -1,8 +1,6 @@
 *San Juan, Argentina* | *+5402645447593* | *hidoggy.music@gmail.com*
 ___
 # **Franco Moreira**
-___
-www.github.com/francomoreira
 
 ## Education
 
