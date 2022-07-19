@@ -1,23 +1,8 @@
-*San Juan, Argentina* | *+5402645447593* | *hidoggy.music@gmail.com*
+🇦🇷 | *hidoggy.music@gmail.com*
 ___
 # **Franco Moreira**
 
-## Education
-
-* ### pass
-* ### pass
-
-## Employment
-
-* ### pass
-* ### pass
-
-## Projects
-
-personal website: www.pass.com (*for addicional informtion and proyects*)
-
-* pass
-* pass
-* pass
-
+* [SWITCH - Mode Light and Night](https://codepen.io/francomoreira/pen/QWmdvoE)
+* [CALCULATE DELAY - calculate in ms the time of you song](https://calculate-delay-time.netlify.app/)
+* [CALCULATE WEIGHT - Calculate you weight in Mars or Jupiter.](https://francomoreira-35731.netlify.app/)
 
