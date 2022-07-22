@@ -3,7 +3,9 @@ ___
 # **Franco Moreira** Frontend Dev
 
 * HTML 🟢
+   * [Course: Frontend by Platzi](https://platzi.com/p/FrancoMoreira/curso/2467-frontend-developer/diploma/detalle/)
 * CSS 🟢
+   * [Course: Frontend by Platz](https://platzi.com/p/FrancoMoreira/curso/2467-frontend-developer/diploma/detalle/)
 * JavaScript 🟢
 
 # Sistems of version control:
