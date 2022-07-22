@@ -132,12 +132,11 @@ ___
 * Electron 🟢
 * Carlo
 * Proton Native
-# Web Assembly
-
-## and Next Learn! 🚀
-
-
-
+# More Skills 🚀
+* [Database Basics by Platzi](https://platzi.com/p/FrancoMoreira/curso/1566-bd/diploma/detalle/)
+* [Excel Basics by Platzi](https://platzi.com/p/FrancoMoreira/curso/1925-excel/diploma/detalle/)
+* [Python Basics](https://platzi.com/p/FrancoMoreira/curso/1937-python/diploma/detalle/)
+## Thanks
 
 * [SWITCH - Mode Light and Night](https://codepen.io/francomoreira/pen/QWmdvoE)
 * [CALCULATE DELAY - calculate in ms the time of you song](https://calculate-delay-time.netlify.app/)
