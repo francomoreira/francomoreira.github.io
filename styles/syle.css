@@ -37,6 +37,10 @@ h3 {
     font-size: 100%;
     margin-bottom: 2vh;
 }
+a {
+    text-decoration: none;
+    color: val(--headline);
+}
 .primaryBox {
     display: flex;
     flex-direction: column;
@@ -44,7 +48,9 @@ h3 {
 }
     .container-profile {
         display: flex;
+        flex-direction: column;
         justify-content: center;
+        align-items: center;
         margin: 3vh;
     }
         #profile-img {
@@ -88,6 +94,12 @@ h3 {
                 height: 2vh;
                 border-radius: 5vw;
               }
+        .link-education .links {
+            color: var(--headline);
+        }
+        .link-education .links:hover {
+            color: var(--button-hover);
+        }
 
 .all-social-media {
     display: flex;
