@@ -72,6 +72,7 @@ a {
             border: 2px solid var(--p);
             background-color: #e16162;
             border-radius: 1vh;
+            transition: 0.2s;
         }
             .resultado {
                 font-size: large;
