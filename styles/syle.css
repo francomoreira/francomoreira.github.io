@@ -99,7 +99,7 @@ a {
             font-size: var(--md);
         }
         .link-education .links:hover {
-            color: var(--button-hover);
+            color: var(--button);
         }
 
 .all-social-media {
