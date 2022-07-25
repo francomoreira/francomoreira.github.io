@@ -87,7 +87,8 @@ a {
                 border-radius: 20px;
                 width: 50%;
                 margin-bottom: 1vh;
-                color: var(--button-txt)
+                color: var(--button-txt);
+                cursor: pointer;
             }
 
 .all-social-media {
