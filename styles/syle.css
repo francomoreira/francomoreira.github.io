@@ -81,7 +81,7 @@ a {
                 background-color: var(--button);
                 color: var(--button-txt);
                 text-decoration: none;
-                padding: 15px 25px;
+                padding: 15px;
                 margin: 0.5vh;
                 border-radius: 3vw;
                 height: 1vh;
