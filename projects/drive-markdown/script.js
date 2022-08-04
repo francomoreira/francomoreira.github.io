@@ -12,7 +12,7 @@ let checkBoxOnOff = true;
 
 function obtenerUrl() {
     const urlUsuario = input.value;
-    const urlParaConcatenar = "http://drive.google.com/uc?export=view&id="
+    const urlParaConcatenar = "https://drive.google.com/uc?export=view&id="
     const primeraParte = "https://drive.google.com/file/d/"
     const segundaParte = "/view?usp=sharing"
 
