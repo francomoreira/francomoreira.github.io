@@ -1,0 +1,3 @@
+[submodule "projects/sticky-menu-fixed"]
+	path = projects/sticky-menu-fixed
+	url = https://github.com/francomoreira/sticky-menu-fixed
