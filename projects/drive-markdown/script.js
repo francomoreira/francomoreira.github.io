@@ -22,7 +22,7 @@ function obtenerUrl() {
     if (checkBoxOnOff == true) {
         resultado.innerHTML = "![]("+result+")";
     } else {
-        resultado.innerHTML = "<a href="+result+" target='_blank'>"+result+"</a>";
+        resultado.innerHTML = "<a href="+result+" target='_blank'>"+ "<img src='" + result+ + "'>""</a>";
     }
     botonCopiar.style.display = "flex";
     input.style.display = "none";
