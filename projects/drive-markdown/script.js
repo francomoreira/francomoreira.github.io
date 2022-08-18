@@ -20,9 +20,9 @@ function obtenerUrl() {
     fileId = fileId.replace(segundaParte, "");
     let result = urlParaConcatenar+fileId;
     if (checkBoxOnOff == true) {
-        resultado.innerHTML = "![]("+result+")";
+        resultado.innerText = "![]("+result+")";
     } else {
-        resultado.innerHTML = "<a href="+result+" target='_blank'>"+ "<img src='" + result+ + "'>""</a>";
+        resultado.innerText = "<img src='" + result+ "'>""</a>";
     }
     botonCopiar.style.display = "flex";
     input.style.display = "none";
