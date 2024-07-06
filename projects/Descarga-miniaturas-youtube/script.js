@@ -1,39 +1,52 @@
-const resultado = document.querySelector('#resultado');
-const input = document.querySelector("#primary-input");
-const boton = document.getElementById("primary-button");
+// definiendo las constantes
+const urlUser = document.querySelector("#primary-input"); // texto que mete el usuario
+const botonOk = document.getElementById("primary-button"); // boton principal, el de OK
 const botonCopiar = document.getElementById("copiar-button");
-const check1 = document.getElementById('check1');
+const checkbox720p = document.getElementById('check1'); // checkbox de 720p
 const thumbPreview = document.getElementById("thumbnail-preview");
+const resultado = document.querySelector('#resultado');
 
-check1.addEventListener('click', checkOpcionMarkdown)
-boton.addEventListener('click', obtenerUrl);
+// eventos
+checkbox720p.addEventListener('click', checkOpcionMarkdown)
+botonOk.addEventListener('click', concatenarURL);
 botonCopiar.addEventListener('click', copiandoTexto);
 
 let checkBoxOnOff = true;
 let thumbImg;
 
-function obtenerUrl() {
-    const urlUsuario = input.value;
+
+function getYTvideoId(url) {
+    const urlObj = new URL(url);
+    if (urlObj.hostname === 'youtu.be') {
+        return urlObj.pathname.slice(1);
+    } else if (urlObj.hostname.includes('youtube.com')) {
+        return urlObj.searchParams.get('v');
+    }
+    return null;
+  }
+  
+function concatenarURL() {
+    const url = urlUser.value;
     const primeraParteAConcatenar = "https://i.ytimg.com/vi/"
     const segundaParteAConcatenar720 = "/hq720.jpg"
     const segundaParteAConcatenarDefault = "/hqdefault.jpg"
-    const parteABorrar = "https://youtu.be/"
 
-    let fileId = urlUsuario.replace(parteABorrar, "");
-    let result = primeraParteAConcatenar+fileId;
-    thumbImg = result + segundaParteAConcatenarDefault;
-    if (checkBoxOnOff == true) {
-        result = result + segundaParteAConcatenar720;
+    let result;
+    if (checkBoxOnOff === true) {
+        result = `${primeraParteAConcatenar}${getYTvideoId(url)}${segundaParteAConcatenar720}`;
     } else {
-        result = result + segundaParteAConcatenarDefault;
+        result = `${primeraParteAConcatenar}${getYTvideoId(url)}${segundaParteAConcatenarDefault}`;
     }
+
+    
     resultado.innerHTML = '<a href="'+result+'" target="_blank" rel="noreferrer noopener">'+result+'</a>';
     botonCopiar.style.display = "flex";
-    input.style.display = "none";
-    boton.style.display = "none";
+    urlUser.style.display = "none";
+    botonOk.style.display = "none";
     document.getElementById('checkbox-and-p').style.display = "none";
-    thumbPreview.setAttribute("src", thumbImg);
+    thumbPreview.setAttribute("src", result);
     thumbPreview.style.display = "flex";
+
     return result;
 }
 
@@ -58,9 +71,9 @@ function copiandoTexto() {
     window.getSelection().removeRange(seleccion);
     botonCopiar.style.display = "none";
     resultado.innerText = "Se ha copiado con éxito!";
-    input.style.display = "flex";
-    input.value = "";
-    boton.style.display = "flex";
+    urlUser.style.display = "flex";
+    urlUser.value = "";
+    botonOk.style.display = "flex";
     document.getElementById('checkbox-and-p').style.display = "flex";
     thumbPreview.style.display = "none";
 }
