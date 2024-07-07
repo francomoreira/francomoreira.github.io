@@ -1,21 +1,15 @@
 # **YouTube Thumbnails Downloader 🚀**
 
----
-
 ## Índice
 
 Este proyecto es un aplicación web sencilla que permite descargar las
 miniaturas (thumbnails) de los videos de YouTube desde el enlace del video.
-
----
 
 ## Características
 
 * Puede descargar thumbnails en diferentes resoluciones (720p o default)
 * Permite copiar el enlace descargado al portapapeles
 * Oculta la entrada de URL y botones cuando se ha descargado el thumbnails
-
----
 
 ## Instrucciones de uso
 
@@ -24,11 +18,7 @@ miniaturas (thumbnails) de los videos de YouTube desde el enlace del video.
 3. Haz clic en el botón "OK" para descargar el thumbnail
 4. Puedes copiar el enlace descargado al portapapeles con un solo clic
 
----
-
-### Licencia
+## Licencia
 
 Este proyecto está bajo licencia MIT. Puedes utilizarlo y modificarlo según
 tus necesidades.
-
----
