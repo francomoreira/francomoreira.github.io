@@ -7,7 +7,7 @@ miniaturas (thumbnails) de los videos de YouTube desde el enlace del video.
 
 ## Características
 
-* Puede descargar thumbnails en diferentes resoluciones (720p o default)
+* Puede descargar thumbnails en diferentes resoluciones (720px. o Default)
 * Permite copiar el enlace descargado al portapapeles
 * Oculta la entrada de URL y botones cuando se ha descargado el thumbnails
 
