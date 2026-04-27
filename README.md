@@ -5,32 +5,42 @@
   />
 </a>
 
-# 🚀 Personal Portfolio in Astro
+# 🚀 Portfolio Personal con Astro
 
-## Bienvenido a mi portfolio personal
-Esta es una muestra de cómo podría quedar un portafolio realizado con Astro para la generación de las páginas estáticas que lo conforman, este tipo de sitio son de mi agrado ya que poseen una velocidad de carga superior a las dinámicas, lo que aporta en una mejoría al momento de pensar sobre posicionamiento SEO y demás.
+## Sobre este proyecto
 
-## La idea de este repo es practicar con Astro
-La mejor manera de aprender, de internalizar un conocimiento o una habilidad, es sumergirse en ella diariamente, por ello es que se utiliza Astro en este proyecto
+Este es mi portfolio personal construido con Astro, donde comparto proyectos, herramientas web y contenido relacionado con tecnología y educación.
+
+Como **Técnico Agrónomo Agropecuario** y estudiante del **Profesorado de Educación Secundaria** en San Juan, Argentina, este espacio refleja mi interés por la tecnología aplicada a la educación y el sector agropecuario.
+
+## ¿Por qué Astro?
+
+Elegí Astro para este proyecto porque:
+
+- **Velocidad de carga superior:** Las páginas estáticas se cargan mucho más rápido que las dinámicas
+- **Mejor SEO:** Los sitios estáticos son más fáciles de indexar por los motores de búsqueda
+- **Flexibilidad:** Puedo combinar contenido estático (blog, apps) con componentes interactivos cuando los necesito
+- **Aprendizaje activo:** La mejor forma de aprender es practicando
+
+## Contenido del sitio
+
+- **Portfolio:** Presentación y proyectos destacados
+- **Blog:** Artículos sobre tecnología, educación y agro-tech
+- **Apps:** Herramientas web útiles que he desarrollado
 
 ## Ventajas de un Sitio Web Estático
 
-Un sitio web estático tiene varias ventajas:
-
-- [x] **Velocidad de Carga:** 
-Al ser archivos simples y precompilados, los tiempos de carga son muy rápidos, proporcionando una excelente experiencia al usuario.
-- [x] **Seguridad:** 
-Al no depender de una base de datos o servidores dinámicos, se reducen los riesgos de vulnerabilidades y ataques.
-- [x] **Escalabilidad Sencilla:** 
-La simplicidad de la estructura hace que sea fácil escalar el sitio y administrar el contenido.
+- [x] **Velocidad de Carga:** Archivos precompilados = tiempos de carga rápidos y mejor experiencia de usuario
+- [x] **Seguridad:** Sin base de datos = menos vulnerabilidades y ataques
+- [x] **Escalabilidad Sencilla:** Fácil de administrar y mantener
 
 
 ## Demo portfolio
-* https://franmore.ar
+* https://francomoreira.github.io
 ## Demo blog
-* https://franmore.ar/blog
+* https://francomoreira.github.io/blog
 ## Demo proyectitos o aplicaciones
-* https://franmore.ar/apps
+* https://francomoreira.github.io/apps
 
 ## Agradecimiento
 
