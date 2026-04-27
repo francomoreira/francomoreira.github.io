@@ -1,0 +1,444 @@
+---
+import MainLayouts from "../../../layouts/MainLayouts.astro";
+
+let data = {
+    title: "YT-DLP Command Generator",
+    img: "/app-img/yt-cover.jpeg",
+    descr: "Generador de comandos para yt-dlp. Descargá videos, audio o subtítulos de YouTube fácilmente. Seleccioná el modo que necesites y copiá el comando listo para usar en tu terminal."
+}
+---
+
+<MainLayouts title={data.title} descr={data.descr} img={data.img}>
+    <div class="container">
+        <h1>YT-DLP Command Generator</h1>
+        
+        <!-- Descripción SEO -->
+        <div class="intro-text">
+            <p><strong>yt-dlp</strong> es una herramienta de línea de comandos para descargar videos de YouTube y otras plataformas. Este generador te ayuda a crear el comando correcto según lo que necesites: video completo, solo audio, o transcripciones automáticas.</p>
+        </div>
+
+        <div class="app-box sombra">
+            <div class="input-group">
+                <label for="urlInput">URL del video de YouTube</label>
+                <input 
+                    id="urlInput" 
+                    type="text" 
+                    placeholder="https://www.youtube.com/watch?v=..." 
+                />
+            </div>
+
+            <div class="modes-section">
+                <label>Seleccioná el modo de descarga</label>
+                <div class="modes">
+                    <button class="mode-btn selected" data-mode="subs" onclick="selectMode(this)">
+                        <strong>Transcripción (.vtt)</strong>
+                        <span class="tag">Descarga solo los subtítulos automáticos</span>
+                    </button>
+                    <button class="mode-btn" data-mode="video" onclick="selectMode(this)">
+                        <strong>Video completo</strong>
+                        <span class="tag">Requiere cookies.txt exportado</span>
+                    </button>
+                    <button class="mode-btn" data-mode="audio" onclick="selectMode(this)">
+                        <strong>Solo audio (mp3)</strong>
+                        <span class="tag">Extrae el audio en formato mp3</span>
+                    </button>
+                    <button class="mode-btn" data-mode="cookies" onclick="selectMode(this)">
+                        <strong>Video con cookies del navegador</strong>
+                        <span class="tag">Usa cookies directamente de Chrome</span>
+                    </button>
+                </div>
+            </div>
+
+            <button id="generateBtn" class="generate-btn sombra" onclick="generate()">
+                Generar Comando
+            </button>
+
+            <div id="output" class="output-box sombra">
+                <div id="terminal" class="terminal">
+                    <span class="dim">Ingresá una URL de YouTube y seleccioná un modo...</span>
+                </div>
+                
+                <div class="copy-section">
+                    <div id="cmdDisplay" class="cmd-display">_</div>
+                    <button id="copyBtn" class="copy-btn" onclick="copyCmd()">Copiar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instrucciones -->
+        <div class="instructions">
+            <h2>¿Cómo usar esta herramienta?</h2>
+            <ol>
+                <li><strong>Instalá yt-dlp:</strong> Si todavía no lo tenés, instalalo con <code>pip install yt-dlp</code></li>
+                <li><strong>Pegá la URL:</strong> Copiá el enlace del video de YouTube en el campo de arriba</li>
+                <li><strong>Elegí el modo:</strong> Seleccioná qué querés descargar (video, audio o subtítulos)</li>
+                <li><strong>Generá y copiá:</strong> Click en "Generar Comando" y después en "Copiar"</li>
+                <li><strong>Ejecutá en tu terminal:</strong> Pegá el comando en tu terminal y presioná Enter</li>
+            </ol>
+        </div>
+
+        <!-- FAQ -->
+        <div class="faq">
+            <h2>Preguntas frecuentes</h2>
+            
+            <div class="faq-item">
+                <h3>¿Qué es yt-dlp?</h3>
+                <p>yt-dlp es una herramienta de código abierto para descargar videos de YouTube y otras plataformas. Es una versión mejorada y mantenida activamente de youtube-dl.</p>
+            </div>
+
+            <div class="faq-item">
+                <h3>¿Para qué sirve el archivo cookies.txt?</h3>
+                <p>Algunos videos requieren que estés autenticado en YouTube (videos privados, de pago, o restringidos por edad). El archivo cookies.txt contiene tus cookies de sesión para que yt-dlp pueda acceder como si fueras vos. Podés exportarlo con la extensión "Get cookies.txt LOCALLY" de Chrome.</p>
+            </div>
+
+            <div class="faq-item">
+                <h3>¿Qué diferencia hay entre usar cookies.txt y cookies del navegador?</h3>
+                <p>Usar <code>--cookies cookies.txt</code> requiere exportar las cookies manualmente a un archivo. Usar <code>--cookies-from-browser chrome</code> toma las cookies directamente del navegador (Chrome debe estar cerrado).</p>
+            </div>
+
+            <div class="faq-item">
+                <h3>¿Los subtítulos se descargan en español?</h3>
+                <p>Sí, el comando usa <code>--sub-lang es</code> para descargar subtítulos en español. Si el video no tiene subtítulos en español, intentará con los automáticos generados por YouTube.</p>
+            </div>
+        </div>
+    </div>
+</MainLayouts>
+
+<style>
+.container {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+h1 {
+    margin-top: 4vh;
+    margin-bottom: 2vh;
+    margin-inline: 2rem;
+    text-align: center;
+}
+
+h2 {
+    margin-top: 3rem;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+}
+
+h3 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+    color: var(--p);
+}
+
+.intro-text {
+    max-width: 750px;
+    text-align: center;
+    margin-bottom: 3vh;
+    line-height: 1.6;
+    color: var(--p);
+}
+
+.app-box {
+    width: 100%;
+    max-width: 750px;
+    background-color: var(--button-hover);
+    border-radius: 10px;
+    border: 3px solid var(--p);
+    padding: 2rem;
+    margin-bottom: 3rem;
+}
+
+.sombra {
+    -moz-box-shadow: 5px 8px 11px -6px rgba(0,0,0,0.64);
+    -webkit-box-shadow: 5px 8px 11px -6px rgba(0,0,0,0.64);
+    box-shadow: 5px 8px 11px -6px rgba(0,0,0,0.64);
+}
+
+.input-group {
+    margin-bottom: 2rem;
+}
+
+.input-group label,
+.modes-section > label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--p);
+    font-weight: 500;
+}
+
+#urlInput {
+    width: 100%;
+    background-color: var(--bg-color);
+    border: 2px solid var(--p);
+    color: var(--headline);
+    font-family: "Quicksand", sans-serif;
+    font-size: 1rem;
+    padding: 0.75rem;
+    border-radius: 8px;
+    outline: none;
+    transition: 0.2s;
+}
+
+#urlInput:focus {
+    border-color: var(--headline);
+}
+
+#urlInput::placeholder {
+    color: var(--shadow-box);
+}
+
+.modes-section {
+    margin-bottom: 2rem;
+}
+
+.modes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+@media (max-width: 600px) {
+    .modes {
+        grid-template-columns: 1fr;
+    }
+}
+
+.mode-btn {
+    background-color: var(--bg-color);
+    border: 2px solid var(--shadow-box);
+    color: var(--headline);
+    font-family: "Quicksand", sans-serif;
+    font-size: 0.95rem;
+    padding: 1rem;
+    cursor: pointer;
+    border-radius: 8px;
+    text-align: left;
+    transition: all 0.2s;
+    line-height: 1.6;
+}
+
+.mode-btn:hover {
+    border-color: var(--p);
+    background-color: var(--shadow-box);
+}
+
+.mode-btn.selected {
+    border-color: var(--p);
+    background-color: var(--shadow-box);
+}
+
+.mode-btn strong {
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.mode-btn .tag {
+    font-size: 0.8rem;
+    color: var(--p);
+    display: block;
+}
+
+.generate-btn {
+    width: 100%;
+    background-color: #ffc83d;
+    border: none;
+    color: var(--button-txt);
+    font-family: "Quicksand", sans-serif;
+    font-size: 1.1rem;
+    font-weight: bold;
+    padding: 1rem;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s;
+    margin-bottom: 1.5rem;
+}
+
+.generate-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 200, 61, 0.3);
+}
+
+.generate-btn:active {
+    transform: translateY(0);
+}
+
+.output-box {
+    background-color: var(--bg-color);
+    border: 2px solid var(--p);
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.terminal {
+    min-height: 60px;
+    max-height: 200px;
+    overflow-y: auto;
+    font-family: "Roboto Mono", monospace;
+    font-size: 0.85rem;
+    line-height: 1.8;
+    margin-bottom: 1rem;
+    color: var(--p);
+}
+
+.dim {
+    color: var(--shadow-box);
+}
+
+.bright {
+    color: var(--headline);
+}
+
+.warn {
+    color: #ffaa00;
+}
+
+.copy-section {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.cmd-display {
+    flex: 1;
+    background-color: var(--button-hover);
+    border: 1px solid var(--shadow-box);
+    color: var(--p);
+    font-family: "Roboto Mono", monospace;
+    font-size: 0.85rem;
+    padding: 0.6rem;
+    border-radius: 6px;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+.copy-btn {
+    background-color: var(--bg-color);
+    border: 2px solid var(--p);
+    color: var(--p);
+    font-family: "Quicksand", sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 0.6rem 1.25rem;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.copy-btn:hover {
+    background-color: var(--p);
+    color: var(--bg-color);
+}
+
+/* Estilos para instrucciones y FAQ */
+.instructions, .faq {
+    width: 100%;
+    max-width: 750px;
+    text-align: left;
+    margin-bottom: 2rem;
+}
+
+.instructions ol {
+    line-height: 1.8;
+    padding-left: 1.5rem;
+}
+
+.instructions li {
+    margin-bottom: 1rem;
+}
+
+.instructions code,
+.faq code {
+    background-color: var(--button-hover);
+    color: var(--p);
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-family: "Roboto Mono", monospace;
+    font-size: 0.9em;
+}
+
+.faq-item {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background-color: var(--button-hover);
+    border-radius: 8px;
+    border-left: 4px solid var(--p);
+}
+
+.faq-item p {
+    line-height: 1.6;
+    margin-top: 0.5rem;
+}
+</style>
+
+<script>
+let selectedMode = 'subs';
+let lastCmd = '';
+
+function selectMode(el) {
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedMode = el.dataset.mode;
+}
+
+const commands = {
+    subs: url => `yt-dlp --write-auto-subs --skip-download --sub-lang es "${url}"`,
+    video: url => `yt-dlp --cookies cookies.txt "${url}"`,
+    audio: url => `yt-dlp -x --audio-format mp3 --cookies cookies.txt "${url}"`,
+    cookies: url => `yt-dlp --cookies-from-browser chrome "${url}"`
+};
+
+const notes = {
+    subs: 'Descarga el archivo .vtt con la transcripción automática en español. Podés renombrarlo a .txt para leerlo como texto plano.',
+    video: 'Descarga el video en la mejor calidad disponible. Necesitás tener el archivo cookies.txt en la misma carpeta donde ejecutes el comando.',
+    audio: 'Extrae solo el audio del video y lo convierte a MP3. Requiere tener FFmpeg instalado y cookies.txt.',
+    cookies: 'Usa las cookies de tu navegador Chrome directamente. Chrome debe estar cerrado al ejecutar este comando.'
+};
+
+function typeText(el, lines, i = 0) {
+    if (i >= lines.length) return;
+    el.innerHTML += lines[i] + '<br>';
+    el.scrollTop = el.scrollHeight;
+    setTimeout(() => typeText(el, lines, i + 1), 60);
+}
+
+function generate() {
+    const url = document.getElementById('urlInput').value.trim();
+    const term = document.getElementById('terminal');
+    term.innerHTML = '';
+
+    if (!url) {
+        typeText(term, [
+            '<span class="warn">Error: No se detectó ninguna URL.</span>',
+            '<span class="dim">Pegá una URL de YouTube primero...</span>'
+        ]);
+        return;
+    }
+
+    const cmd = commands[selectedMode](url);
+    lastCmd = cmd;
+    document.getElementById('cmdDisplay').textContent = cmd;
+
+    typeText(term, [
+        '<span class="dim">Analizando URL...</span>',
+        `<span class="bright">Modo seleccionado: ${selectedMode.toUpperCase()}</span>`,
+        `<span class="dim">${notes[selectedMode]}</span>`,
+        '<span class="bright">✓ Comando generado correctamente. Copialo y ejecutalo en tu terminal.</span>'
+    ]);
+}
+
+function copyCmd() {
+    if (!lastCmd) return;
+    navigator.clipboard.writeText(lastCmd).then(() => {
+        const btn = document.getElementById('copyBtn');
+        const originalText = btn.textContent;
+        btn.textContent = '✓ Copiado!';
+        setTimeout(() => btn.textContent = originalText, 2000);
+    });
+}
+</script>
