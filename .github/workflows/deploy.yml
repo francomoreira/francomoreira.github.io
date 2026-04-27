@@ -1,32 +1,54 @@
-on: #  Define los eventos que desencadenan el flujo de trabajo
-  #push: # Se ejecuta cuando haces un push a tu repositorio
-  #  branches:
-  #    - main # en la rama main
-  workflow_dispatch: # Puedes ejecutar este flujo manualmente desde la interfaz web de GitHub Actions.
-jobs: # Describe los trabajos que se ejecutan dentro del flujo de trabajo.
-  run_pull: # El nombre del trabajo. Se ejecuta en una máquina virtual Ubuntu
-    name: run pull 
+name: Deploy to GitHub Pages
+
+on:
+  # Se ejecuta cuando hay push a main
+  push:
+    branches: [ main ]
+  # También permite ejecutarlo manualmente
+  workflow_dispatch:
+
+# Permisos necesarios para GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Solo un deploy a la vez
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build Astro site
+        run: npm run build
+      
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
 
-    steps: # Define las acciones secuenciales dentro del trabajo
-      - name: executing remote ssh commands using ssh key
-        uses: appleboy/ssh-action@v1.0.0 # Usa la acción `appleboyssh-action@v1.0.0` para ejecutar comandos en un servidor remoto mediante una llave SSH privada.
-        with: # Define los parámetros para la acción
-          host: ${{ secrets.SSH_HOST }} # `host`, `username`, `key`, `port`: Credenciales del servidor SSH
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: | # El bloque de comandos que se ejecuta en el servidor remoto:
-            
-            # Cambia al directorio de trabajo donde se encuentra tu proyecto
-            cd ${{ secrets.WORK_DIR }} 
-
-            #  `git fetch ... git pull`: Actualiza los archivos del repositorio.
-            git fetch 
-            git checkout ${{ secrets.MAIN_BRANCH }} 
-            git pull 
-
-            #  Instala las dependencias y compila el proyecto.
-            npm install
-            npm run build # comando para deployar astro
-            exit
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
