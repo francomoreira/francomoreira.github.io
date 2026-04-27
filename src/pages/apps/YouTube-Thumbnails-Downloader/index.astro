@@ -12,6 +12,11 @@ let data = {
     <div class="container">
         <h1>YouTube Thumbnails Downloader 🤟</h1>
         
+        <!-- Descripción SEO -->
+        <div class="intro-text">
+            <p>Descargá miniaturas de YouTube en alta calidad de forma rápida y gratuita. Esta herramienta te permite obtener las imágenes en miniatura (thumbnails) de cualquier video de YouTube en resolución 720p o estándar, sin necesidad de instalar extensiones ni registrarte.</p>
+        </div>
+        
         <div id="result-box" class="sombra">
             <img class="sombra" id="thumbnail-preview" src={data.img} alt="thumbnail-youtube-user">
             <p id="resultado"></p>
@@ -28,6 +33,42 @@ let data = {
                 <p>720p</p>
             </div>
         </div>
+
+        <!-- Instrucciones -->
+        <div class="instructions">
+            <h2>¿Cómo descargar miniaturas de YouTube?</h2>
+            <ol>
+                <li><strong>Copiá la URL del video:</strong> Andá al video de YouTube y copiá el enlace desde la barra de direcciones</li>
+                <li><strong>Pegá el enlace:</strong> Pegalo en el campo de texto de arriba</li>
+                <li><strong>Elegí la calidad:</strong> Dejá marcado "720p" para alta resolución o desmarcalo para calidad estándar</li>
+                <li><strong>Descargá:</strong> Click en "OK" y después en el enlace que aparece para guardar la imagen</li>
+            </ol>
+        </div>
+
+        <!-- FAQ SEO -->
+        <div class="faq">
+            <h2>Preguntas frecuentes</h2>
+            
+            <div class="faq-item">
+                <h3>¿Puedo descargar miniaturas de cualquier video de YouTube?</h3>
+                <p>Sí, podés descargar la miniatura de cualquier video público de YouTube. Solo necesitás la URL del video.</p>
+            </div>
+
+            <div class="faq-item">
+                <h3>¿En qué resolución se descargan las miniaturas?</h3>
+                <p>Podés elegir entre dos opciones: resolución HD (720p - 1280x720 píxeles) marcando el checkbox, o resolución estándar (480x360 píxeles) desmarcándolo.</p>
+            </div>
+
+            <div class="faq-item">
+                <h3>¿Es gratis esta herramienta?</h3>
+                <p>Totalmente gratis, sin registros, sin límites y sin anuncios molestos. No necesitás instalar nada ni crear una cuenta.</p>
+            </div>
+
+            <div class="faq-item">
+                <h3>¿Funciona con videos de YouTube Shorts?</h3>
+                <p>Sí, funciona con videos normales de YouTube, YouTube Shorts y enlaces de youtu.be.</p>
+            </div>
+        </div>
     </div>
 
 </MainLayouts>
@@ -37,11 +78,33 @@ let data = {
     display: flex;
     align-items: center;
     flex-direction: column;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 1rem;
 }
 h1 {
     margin-top: 4vh;
-    margin-bottom: 5vh;
+    margin-bottom: 2vh;
     margin-inline: 2rem;
+    text-align: center;
+}
+h2 {
+    margin-top: 3rem;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+}
+h3 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+    color: var(--p);
+}
+.intro-text {
+    max-width: 700px;
+    text-align: center;
+    margin-bottom: 3vh;
+    line-height: 1.6;
+    color: var(--p);
 }
 .container > div#result-box {
     /* height: 15vh; */
@@ -56,6 +119,7 @@ h1 {
     padding-bottom: 2vh;
     transition: 0.2s;
     width: 40vh;
+    margin-bottom: 3rem;
 }
 .sombra {
     -moz-box-shadow: 5px 8px 11px -6px rgba(0,0,0,0.64);
@@ -107,6 +171,36 @@ h1 {
     #checkbox-and-p {
         display: flex;
     }
+
+/* Estilos para instrucciones y FAQ */
+.instructions, .faq {
+    width: 100%;
+    max-width: 700px;
+    text-align: left;
+    margin-bottom: 2rem;
+}
+
+.instructions ol {
+    line-height: 1.8;
+    padding-left: 1.5rem;
+}
+
+.instructions li {
+    margin-bottom: 1rem;
+}
+
+.faq-item {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background-color: var(--button-hover);
+    border-radius: 8px;
+    border-left: 4px solid var(--p);
+}
+
+.faq-item p {
+    line-height: 1.6;
+    margin-top: 0.5rem;
+}
 
 </style>
 
