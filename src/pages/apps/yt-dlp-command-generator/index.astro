@@ -201,6 +201,8 @@ h3 {
 
 #urlInput {
     width: 100%;
+    max-width: 100%; /* Fuerza que no exceda el contenedor */
+    box-sizing: border-box; /* Incluye padding y border en el ancho total */
     background-color: var(--bg-color);
     border: 2px solid var(--p);
     color: var(--headline);
