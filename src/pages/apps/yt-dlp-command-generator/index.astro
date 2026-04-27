@@ -68,13 +68,40 @@ let data = {
         <!-- Instrucciones -->
         <div class="instructions">
             <h2>¿Cómo usar esta herramienta?</h2>
+            
+            <h3>Paso 1: Instalar yt-dlp en Windows</h3>
             <ol>
-                <li><strong>Instalá yt-dlp:</strong> Si todavía no lo tenés, instalalo con <code>pip install yt-dlp</code></li>
-                <li><strong>Pegá la URL:</strong> Copiá el enlace del video de YouTube en el campo de arriba</li>
-                <li><strong>Elegí el modo:</strong> Seleccioná qué querés descargar (video, audio o subtítulos)</li>
-                <li><strong>Generá y copiá:</strong> Click en "Generar Comando" y después en "Copiar"</li>
-                <li><strong>Ejecutá en tu terminal:</strong> Pegá el comando en tu terminal y presioná Enter</li>
+                <li><strong>Descargá yt-dlp:</strong> Andá a <a href="https://github.com/yt-dlp/yt-dlp/releases/latest" target="_blank" rel="noopener">esta página</a> y descargá el archivo <code>yt-dlp.exe</code></li>
+                <li><strong>Guardalo en una carpeta fácil de encontrar:</strong> Por ejemplo, creá una carpeta <code>C:\yt-dlp</code> y movelo ahí</li>
             </ol>
+
+            <h3>Paso 2: Generar tu comando</h3>
+            <ol start="3">
+                <li><strong>Copiá la URL del video:</strong> Andá al video de YouTube y copiá el enlace de la barra de direcciones</li>
+                <li><strong>Pegá el enlace acá arriba</strong> en el campo "URL del video de YouTube"</li>
+                <li><strong>Elegí qué querés descargar:</strong> Seleccioná una de las opciones (transcripción, video, audio)</li>
+                <li><strong>Click en "Generar Comando"</strong> y después en el botón amarillo <strong>"Copiar"</strong></li>
+            </ol>
+
+            <h3>Paso 3: Ejecutar el comando en Windows</h3>
+            <ol start="7">
+                <li><strong>Abrir el símbolo del sistema:</strong> Presioná la tecla Windows, escribí <code>cmd</code> y presioná Enter</li>
+                <li><strong>Ir a la carpeta donde guardaste yt-dlp:</strong> Escribí <code>cd C:\yt-dlp</code> (o la ruta donde lo guardaste) y presioná Enter</li>
+                <li><strong>Pegar el comando:</strong> Click derecho en la ventana negra y elegí "Pegar" (o Ctrl+V)</li>
+                <li><strong>Ejecutar:</strong> Presioná Enter y esperá a que termine la descarga</li>
+            </ol>
+
+            <div class="note-box">
+                <strong>📌 Nota sobre cookies.txt:</strong> Algunos modos (video y audio) necesitan un archivo llamado <code>cookies.txt</code>. 
+                <br><br>
+                <strong>¿Cómo conseguirlo?</strong>
+                <ol>
+                    <li>Instalá la extensión de Chrome <a href="https://chrome.google.com/webstore/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc" target="_blank" rel="noopener">"Get cookies.txt LOCALLY"</a></li>
+                    <li>Andá a YouTube.com (iniciá sesión si no lo hiciste)</li>
+                    <li>Click en el ícono de la extensión y descargá el archivo</li>
+                    <li>Guardá el archivo <code>cookies.txt</code> en la misma carpeta donde está <code>yt-dlp.exe</code></li>
+                </ol>
+            </div>
         </div>
 
         <!-- FAQ -->
@@ -150,6 +177,7 @@ h3 {
     border: 3px solid var(--p);
     padding: 2rem;
     margin-bottom: 3rem;
+    overflow: hidden; /* Evita que el input sobresalga */
 }
 
 .sombra {
@@ -317,12 +345,12 @@ h3 {
 }
 
 .copy-btn {
-    background-color: var(--bg-color);
-    border: 2px solid var(--p);
-    color: var(--p);
+    background-color: #ffc83d;
+    border: none;
+    color: var(--button-txt);
     font-family: "Quicksand", sans-serif;
     font-size: 0.9rem;
-    font-weight: 500;
+    font-weight: bold;
     padding: 0.6rem 1.25rem;
     cursor: pointer;
     border-radius: 6px;
@@ -331,8 +359,8 @@ h3 {
 }
 
 .copy-btn:hover {
-    background-color: var(--p);
-    color: var(--bg-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 200, 61, 0.3);
 }
 
 /* Estilos para instrucciones y FAQ */
@@ -350,6 +378,32 @@ h3 {
 
 .instructions li {
     margin-bottom: 1rem;
+}
+
+.note-box {
+    background-color: var(--shadow-box);
+    border-left: 4px solid #ffc83d;
+    padding: 1.5rem;
+    margin-top: 2rem;
+    border-radius: 8px;
+}
+
+.note-box ol {
+    margin-top: 1rem;
+    padding-left: 1.5rem;
+}
+
+.note-box li {
+    margin-bottom: 0.75rem;
+}
+
+.note-box a {
+    color: var(--p);
+    text-decoration: underline;
+}
+
+.note-box a:hover {
+    color: var(--headline);
 }
 
 .instructions code,
