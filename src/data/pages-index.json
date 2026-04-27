@@ -13,5 +13,10 @@
     "id": 3,
     "path": "/YouTube-Thumbnails-Downloader/",
     "title": "YouTube Thumbnails Downloader 🤟"
+  },
+  {
+    "id": 4,
+    "path": "/yt-dlp-command-generator/",
+    "title": "YT-DLP Command Generator"
   }
 ]
