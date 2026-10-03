@@ -1,0 +1,1437 @@
+---
+import MainLayouts from "../../../layouts/MainLayouts.astro";
+
+let data = {
+    title: "Calculadora de compostaje, biol y bocashi",
+    descr: "Calculadora de compostaje, biol anaerobio y bocashi. Cargás los materiales y te dice el C/N efectivo, la humedad, cuánta agua agregar y qué falta para equilibrar la pila o el tacho. Funciona sin internet, en el celular o la compu."
+}
+---
+
+<style is:global>
+
+    .compost-app{ --verde:#2e7d32; --amar:#f9a825; --rojo:#c62828; --gris:#666; --linea:#e0e0e0; }
+    .compost-app, .compost-app *{ box-sizing:border-box; }
+    .compost-app{ font-family:system-ui,Segoe UI,Roboto,sans-serif; margin:0; background:#faf8f4; color:#222; }
+    .compost-app .app{ display:flex; min-height:100vh; }
+    .compost-app .menu{ width:190px; flex:0 0 190px; background:#fff; border-right:1px solid var(--linea); padding:14px 10px; }
+    .compost-app .menu h1{ font-size:15px; margin:0 0 12px 4px; }
+    .compost-app .menu button{ display:block; width:100%; text-align:left; padding:9px 10px; margin-bottom:6px; border:1px solid var(--linea);
+                background:#fff; border-radius:8px; cursor:pointer; font-size:14px; }
+    .compost-app .menu button:hover{ background:#f5f5f5; }
+    .compost-app .menu button.on{ background:#e8f5e9; border-color:#a5d6a7; font-weight:600; color:#1b5e20; }
+    .compost-app .menu .pie{ font-size:11px; color:var(--gris); margin-top:14px; line-height:1.5; }
+    .compost-app .cont{ flex:1; padding:16px 18px; min-width:0; }
+    .compost-app h2{ font-size:19px; margin:0 0 2px; }
+    .compost-app .sub{ color:var(--gris); font-size:13px; margin-bottom:14px; }
+    .compost-app .card{ background:#fff; border:1px solid var(--linea); border-radius:10px; padding:14px; margin-bottom:14px; }
+    .compost-app table{ width:100%; border-collapse:collapse; font-size:13px; }
+    .compost-app th{ text-align:left; font-weight:600; color:var(--gris); padding:4px; border-bottom:1px solid var(--linea); }
+    .compost-app td{ padding:3px 3px; border-bottom:1px solid #f2f2f2; }
+    .compost-app input[type=number], .compost-app select{ width:100%; padding:5px; border:1px solid var(--linea); border-radius:5px; font-size:13px; }
+    .compost-app button.acc{ padding:6px 10px; border:1px solid var(--linea); background:#fff; border-radius:6px; cursor:pointer; font-size:13px; }
+    .compost-app button.acc:hover{ background:#f5f5f5; }
+    .compost-app .del{ color:var(--rojo); border-color:#f0c0c0; padding:4px 8px; }
+    .compost-app .big{ display:flex; flex-wrap:wrap; gap:12px; }
+    .compost-app .kpi{ flex:1 1 128px; background:#fbfbf9; border:1px solid var(--linea); border-radius:8px; padding:10px; }
+    .compost-app .kpi .lbl{ font-size:11px; color:var(--gris); text-transform:uppercase; letter-spacing:.4px; }
+    .compost-app .kpi .val{ font-size:21px; font-weight:700; }
+    .compost-app .kpi .val small{ font-size:12px; font-weight:400; }
+    .compost-app .gauge{ position:relative; height:64px; margin:14px 0 4px; }
+    .compost-app .barZonas{ position:absolute; top:24px; left:0; right:0; height:16px; border-radius:8px; overflow:hidden; background:#eee; }
+    .compost-app .zona{ position:absolute; top:0; bottom:0; }
+    .compost-app .zonaLbl{ position:absolute; top:-2px; font-size:10px; color:#1b5e20; font-weight:700; transform:translateX(-50%); }
+    .compost-app .needle{ position:absolute; top:10px; width:2px; height:44px; background:#111; transition:left .25s; }
+    .compost-app .needle:after{ content:''; position:absolute; top:-7px; left:-5px; width:0; height:0;
+      border-left:6px solid transparent; border-right:6px solid transparent; border-top:8px solid #111; }
+    .compost-app .scale{ position:relative; height:18px; font-size:11px; color:var(--gris); }
+    .compost-app .scale span{ position:absolute; transform:translateX(-50%); }
+    .compost-app .verdict{ font-size:15px; padding:10px; border-radius:8px; margin-top:8px; }
+    .compost-app .ok{ background:#e8f5e9; color:#1b5e20; }
+    .compost-app .warn{ background:#fff8e1; color:#7f5f00; }
+    .compost-app .bad{ background:#ffebee; color:#b71c1c; }
+    .compost-app .quehacer{ margin-top:8px; padding:10px 12px; border-radius:8px; background:#fff; border:1px solid #c8e6c9; font-size:14px; line-height:1.55; }
+    .compost-app .quehacer b{ color:#1b5e20; }
+    .compost-app .quehacer .qh{ font-size:11px; text-transform:uppercase; letter-spacing:.4px; color:#2e7d32; font-weight:700; }
+    .compost-app .fix{ font-size:14px; margin-top:10px; padding:10px; background:#f1f8e9; border-radius:8px; border:1px solid #dcedc8; line-height:1.6; }
+    .compost-app .notas{ font-size:12px; color:var(--gris); line-height:1.6; }
+    .compost-app .notas b{ color:#333; }
+    .compost-app .leyenda{ font-size:12.5px; margin-bottom:10px; line-height:1.6; }
+    .compost-app .chip{ display:inline-block; padding:1px 7px; border-radius:10px; color:#fff; font-size:11px; font-weight:600; }
+    .compost-app .chip.verde{ background:#2e7d32; } .chip.amar{ background:#f9a825; color:#3a2c00; } .chip.marron{ background:#795548; }
+    .compost-app .tipo{ white-space:nowrap; }
+    .compost-app .oculto{ display:none; }
+    .compost-app textarea{ width:100%; margin-top:8px; padding:8px; font-family:ui-monospace,Consolas,monospace; font-size:12px;
+            border:1px solid var(--linea); border-radius:6px; }
+  @media (max-width:720px){
+    .compost-app .app{ flex-direction:column; }
+    .compost-app .menu{ width:auto; flex:none; border-right:none; border-bottom:1px solid var(--linea); display:flex; gap:6px; padding:10px; }
+    .compost-app .menu h1, .compost-app .menu .pie{ display:none; }
+    .compost-app .menu button{ margin:0; text-align:center; }
+  }
+
+    /* envoltorio y créditos */
+    .compost-app{ border-radius:0; }
+    .compost-app .menu-titulo{ font-size:15px; font-weight:700; margin:0 0 12px 4px; }
+    .compost-app .creditos{ font-size:12px; color:#666; line-height:1.6; margin:16px 0 24px; padding-top:12px;
+                            border-top:1px solid #e0e0e0; }
+    .compost-app .creditos b{ color:#2e7d32; }
+    .sr-titulo{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
+                clip:rect(0 0 0 0); white-space:nowrap; border:0; }
+</style>
+
+<MainLayouts title={data.title} descr={data.descr}>
+    <h1 class="sr-titulo">Calculadora de compostaje, biol y bocashi</h1>
+    <div class="compost-app">
+
+<div class="app">
+
+  <nav class="menu">
+    <div class="menu-titulo">Calculadoras</div>
+    <button id="btnCompost" class="on" onclick="modo('compost')">🌱 Compostaje</button>
+    <button id="btnBiol" onclick="modo('biol')">🥤 Biol anaerobio</button>
+    <button id="btnBocashi" onclick="modo('bocashi')">🍚 Bocashi</button>
+    <div class="pie">Elegí el proceso. Cada uno tiene sus propias cuentas: el compost busca calor, el biol fermentar sin aire.</div>
+  </nav>
+
+  <main class="cont">
+
+    <section id="secCompost">
+      <h2>Compostaje</h2>
+      <div class="sub">Cargá los kilos y te dice el <b>C/N</b> de la mezcla, la <b>humedad</b>, y cuánto agregar para equilibrarla. Sirve igual para 10 kg que para 2 toneladas.</div>
+
+      <div class="card">
+        <div class="leyenda">
+          <span class="chip verde">verde</span> rico en nitrógeno (C/N bajo) &nbsp;·&nbsp;
+          <span class="chip amar">equilibrado</span> &nbsp;·&nbsp;
+          <span class="chip marron">marrón</span> rico en carbono (C/N alto)
+          <br><span style="color:#666">El color es una guía rápida, pero <b>lo que decide siempre es el número del C/N</b>: el pasto fresco es verde y sin embargo está en 20, que es casi equilibrado.</span>
+        </div>
+        <table>
+          <thead><tr><th style="width:30%">Material</th><th style="width:15%">Tipo</th><th style="width:14%">kg frescos</th><th style="width:12%">Hum. %</th><th style="width:11%">%N</th><th style="width:12%">C/N</th><th></th></tr></thead>
+          <tbody id="filasC"></tbody>
+        </table>
+        <p style="margin:10px 0 0">
+          <button class="acc" onclick="agregarC()">+ Agregar material</button>
+          <button class="acc" onclick="presetC('vaca')">+ Estiércol de vaca</button>
+          <button class="acc" onclick="presetC('vegetal')">+ Restos de cocina / pasto</button>
+          <button class="acc" onclick="presetC('seco')">+ Hojas secas / paja</button>
+          <button class="acc" onclick="reiniciarC()">Reiniciar</button>
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="big">
+          <div class="kpi"><div class="lbl">C/N de la mezcla</div><div class="val" id="cCN">—</div></div>
+          <div class="kpi"><div class="lbl">Humedad de tu mezcla <span style="text-transform:none">(ideal 50–60%)</span></div><div class="val" id="cHum">—</div></div>
+          <div class="kpi"><div class="lbl">Kg frescos</div><div class="val" id="cKg">—</div></div>
+          <div class="kpi"><div class="lbl">Kg secos</div><div class="val" id="cSeco">—</div></div>
+          <div class="kpi"><div class="lbl">N total</div><div class="val" id="cN">—</div></div>
+        </div>
+        <div class="gauge"><div class="barZonas" id="cZonas"></div><div class="needle" id="cAguja" style="left:50%"></div></div>
+        <div class="scale" id="cEscala"></div>
+        <div class="quehacer" id="cHacer"></div>
+        <div class="verdict" id="cVeredicto">Cargá algún material para empezar.</div>
+        <div class="fix" id="cArreglo"></div>
+        <div style="margin-top:12px">
+          <button class="acc" onclick="exportar('c')">⬇ Descargar la receta (.md)</button>
+          <button class="acc" onclick="copiar('c')">Copiar el resumen</button>
+          <span id="avisoC" style="font-size:12px;color:#2e7d32;margin-left:8px"></span>
+        </div>
+        <div style="margin-top:8px">
+          <button class="acc" onclick="copiarParaIA('c')">🤖 Copiar para consultarle a una IA</button>
+          <span id="avisoLC" style="font-size:12px;color:#2e7d32;margin-left:8px"></span>
+        </div>
+        <textarea id="txtC" rows="7" placeholder="Acá va a aparecer el resumen para guardar"></textarea>
+      </div>
+
+      <div class="card notas">
+        \n        <p><b>El ideal es 25 a 35.</b> Debajo de 15 se escapa el nitrógeno como amoníaco y arriba de 40 la pila casi no se calienta. La humedad va entre 50 y 60% durante todo el proceso, y es lo primero que hay que mirar si la pila no levanta.</p>
+        <p style="margin-bottom:0"><b>Cómo se calcula:</b> no se promedian los C/N. Se pasa todo a materia seca, se saca el carbono y el nitrógeno por separado, y se divide el carbono total por el nitrógeno total.</p>
+      </div>
+    </section>
+
+    <section id="secBiol" class="oculto">
+      <h2>Biol anaerobio</h2>
+      <div class="sub">Cargá lo que pensás poner en el tacho y te dice el <b>C/N</b>, cuánta <b>agua</b> agregar y si te pasaste en la ceniza. El biol no busca calor: busca fermentar sin aire.</div>
+
+      <div class="card">
+        <table style="margin-bottom:10px">
+          <tr><td style="width:50%"><b>Volumen del tacho</b></td><td><input type="number" id="bTacho" value="200" oninput="calcularB()"> litros</td></tr>
+          <tr><td><b>Litros de agua que ya le pusiste</b></td><td><input type="number" id="bAgua" value="0" oninput="calcularB()"> litros</td></tr>
+        </table>
+        <table>
+          <thead><tr><th style="width:38%">Material</th><th style="width:14%">Tipo</th><th style="width:22%">kg o litros</th><th style="width:12%">%N</th><th style="width:14%">C/N</th><th></th></tr></thead>
+          <tbody id="filasB"></tbody>
+        </table>
+        <p style="margin:10px 0 0">
+          <button class="acc" onclick="agregarB()">+ Agregar material</button>
+          <button class="acc" onclick="presetB('bosta')">+ Bosta de cerdo</button>
+          <button class="acc" onclick="presetB('verde')">+ Malezas / verde</button>
+          <button class="acc" onclick="presetB('seco')">+ Hojas secas</button>
+          <button class="acc" onclick="presetB('leche')">+ Leche o suero</button>
+          <button class="acc" onclick="presetB('melaza')">+ Melaza o azúcar</button>
+          <button class="acc" onclick="reiniciarB()">Reiniciar</button>
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="big">
+          <div class="kpi"><div class="lbl">C/N de la mezcla <span style="text-transform:none">(ideal 20–30)</span></div><div class="val" id="bCN">—</div></div>
+          <div class="kpi"><div class="lbl">Sólidos <span style="text-transform:none">(ideal 10–20%)</span></div><div class="val" id="bSolidos">—</div></div>
+          <div class="kpi"><div class="lbl">Agua a agregar</div><div class="val" id="bAguaFalta">—</div></div>
+          <div class="kpi"><div class="lbl">Uso del tacho</div><div class="val" id="bUso">—</div></div>
+        </div>
+        <div class="gauge"><div class="barZonas" id="bZonas"></div><div class="needle" id="bAguja" style="left:50%"></div></div>
+        <div class="scale" id="bEscala"></div>
+        <div class="quehacer" id="bHacer"></div>
+        <div class="verdict" id="bVeredicto">Cargá algún material para empezar.</div>
+        <div class="fix" id="bArreglo"></div>
+        <div style="margin-top:12px">
+          <button class="acc" onclick="exportar('b')">⬇ Descargar la receta (.md)</button>
+          <button class="acc" onclick="copiar('b')">Copiar el resumen</button>
+          <span id="avisoB" style="font-size:12px;color:#2e7d32;margin-left:8px"></span>
+        </div>
+        <div style="margin-top:8px">
+          <button class="acc" onclick="copiarParaIA('b')">🤖 Copiar para consultarle a una IA</button>
+          <span id="avisoLB" style="font-size:12px;color:#2e7d32;margin-left:8px"></span>
+        </div>
+        <textarea id="txtB" rows="7" placeholder="Acá va a aparecer el resumen para guardar"></textarea>
+      </div>
+
+      <div class="card notas">
+        <p><b>El biol es otra cosa que el compost.</b> Va hermético, con calorcito suave, y el aire es el enemigo: si entra oxígeno se pudre o se avinagra. El C/N es una referencia (el anaerobio trabaja bien entre 20 y 30), pero lo que decide es el hermético, el tiempo y el olor.</p>
+        <p><b>El agua manda.</b> Un biol es una mezcla líquida: los sólidos deberían quedar entre el 10 y el 20% del total. Si está muy espeso fermenta mal, y si está muy aguado le falta alimento a los microorganismos.</p>
+        <p><b>Las proporciones del protocolo</b> (sobre el volumen final): humus de lombriz 5 a 10%, biochar 2%, ceniza de madera <b>máximo 1%</b>, arcilla 1%, y leche y suero si se usan. El biochar y la ceniza no entran en la cuenta del C/N: son correcciones, no alimento.</p>
+        <p><b>La melaza es la estrella.</b> En líquido y sin aire, la fibra (hojas, paja, aserrín) casi no se degrada: lo que alimenta a los microorganismos son los azúcares simples. Se pone 1 a 2 kg de melaza o azúcar cada 100 litros, y un inóculo (tierra de monte o bosta fresca de vaca) para arrancar con los microbios correctos.</p>
+        <p><b>El gas tiene que salir.</b> Un bidón hermético se infla con la fermentación. Va una trampa de agua: una manguera de la tapa a una botella con agua, así sale el gas y no entra aire.</p>
+        <p style="margin-bottom:0"><b>Para controlar:</b> olor a fermento agrio y no a podrido, color marrón oscuro, sin nata arriba. Un biol sano tarda de 30 a 90 días.</p>
+      </div>
+    </section>
+
+    <section id="secBocashi" class="oculto">
+      <h2>Bocashi</h2>
+      <div class="sub">Un abono <b>fermentado</b>, no un compost: no busca calor, busca que los bichos ganen y fermenten. Va <b>más seco</b> que el compost (35 a 40%) y se <b>voltea para que no caliente</b>. Está listo en 15 a 20 días.</div>
+
+      <div class="card">
+        <table style="margin-bottom:10px">
+          <tr><td style="width:50%"><b>Tamaño de la tanda</b></td><td>
+            <select id="kTam" onchange="aplicarTam()">
+              <option value="50">un montoncito — 50 kg</option>
+              <option value="100" selected>una carretilla — 100 kg</option>
+              <option value="600">media carrada — 600 kg</option>
+              <option value="1200">una carrada — 1.200 kg</option>
+            </select>
+          </td></tr>
+        </table>
+        <table>
+          <thead><tr><th style="width:44%">Ingrediente</th><th style="width:18%">% de la mezcla</th><th style="width:38%">Cuánto va</th></tr></thead>
+          <tbody id="filasK"></tbody>
+        </table>
+        <p style="margin:10px 0 0">
+          <button class="acc" onclick="reiniciarK()">Reiniciar la receta</button>
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="big">
+          <div class="kpi"><div class="lbl">Mezcla total</div><div class="val" id="kTotal">—</div></div>
+          <div class="kpi"><div class="lbl">Azúcar o melaza</div><div class="val" id="kAzucar">—</div></div>
+          <div class="kpi"><div class="lbl">Levadura</div><div class="val" id="kLevadura">—</div></div>
+          <div class="kpi"><div class="lbl">Agua a agregar</div><div class="val" id="kAgua">—</div></div>
+        </div>
+        <div class="quehacer" id="kHacer"></div>
+        <div class="verdict" id="kVeredicto">Elegí el tamaño para empezar.</div>
+        <div class="fix" id="kDetalle"></div>
+        <p style="margin:12px 0 0">
+          <button class="acc" onclick="copiarTexto('k')">📋 Copiar la receta</button>
+          <button class="acc" onclick="copiarParaIA('k')">🤖 Copiar para consultarle a una IA</button>
+          <span id="avisoK"></span>
+        </p>
+        <textarea id="txtK" readonly></textarea>
+        <div class="card notas" style="margin-top:14px">
+          <b>Lo que cambia con el tamaño</b><br>
+          En chico, el problema es que se <b>seca rápido</b> y se enfría: revisá la humedad cada 2 días y tapalo.<br>
+          En grande, el problema es al revés: junta calor solo. Si pasa de <b>45 °C</b>, hay que voltearlo, porque lo que buscás es fermento y no calor.<br>
+          El azúcar y la levadura van <b>siempre en la misma proporción</b>: lo que cambia con el tamaño son el agua que se evapora y los volteos.<br>
+          <b>Sin sal y sin yeso.</b> Muchas recetas los llevan, pero tu suelo ya tiene sal de sobra en el norte.<br>
+          El estiércol va <b>seco o apilado</b>, no fresco del día. Con fresco sale muy húmedo y hay que compensar con más paja. El de cerdo deshidratado que tenés va perfecto acá.
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+const MATC = {
+  "Estiércol de vaca (fresco)":   [80, 0.55, 22, 1],
+  "Estiércol de vaca (seco)":     [20, 1.70, 20, 1],
+  "Estiércol de gallina":         [65, 2.00, 8, 1],
+  "Estiércol de caballo":         [68, 0.60, 25, 1],
+  "Estiércol de oveja":           [65, 0.90, 20, 1],
+  "Estiércol de cabra (fresco)":  [60, 1.80, 18, 1],
+  "Estiércol de cabra (seco)":    [20, 1.80, 18, 1],
+  "Estiércol de cerdo":           [70, 2.00, 13, 1],
+  "Estiércol de cerdo (seco deshidratado)": [12, 2.50, 11, 1],
+  "Restos de cocina / fruta":     [85, 1.20, 18, 1],
+  "Pasto o césped fresco":        [80, 0.90, 20, 1],
+  "Pasto seco / rastrojo":        [15, 0.70, 80, 0.7],
+  "Hojas secas":                  [30, 0.80, 60, 0.6],
+  "Paja de cereal":               [15, 0.60, 90, 0.7],
+  "Aserrín (madera blanda)":      [20, 0.10, 400, 0.3],
+  "Viruta":                       [20, 0.10, 400, 0.3],
+  "Cartón trozado":               [10, 0.10, 300, 0.5],
+  "Borra de café":                [65, 2.00, 20, 1],
+  "Ceniza de madera":             [5,  0.00, 0, 0],
+  "Humus de lombriz":             [40, 1.50, 12, 1]
+};
+const MATB = {
+  "Bosta de cerdo":               [70, 2.00, 13, 1],
+  "Bosta de vaca":                [80, 0.55, 22, 1],
+  "Bosta de gallina":             [65, 2.00, 8, 1],
+  "Bosta de cabra":               [60, 1.80, 18, 1],
+  "Malezas / pasto verde":        [80, 0.90, 20, 1],
+  "Restos de cocina / fruta":     [85, 1.20, 18, 1],
+  "Hojas secas otoñales":         [30, 0.80, 60, 0.2],
+  "Pasto seco / rastrojo":        [15, 0.70, 80, 0.3],
+  "Paja":                         [15, 0.60, 90, 0.2],
+  "Borra de café":                [65, 2.00, 20, 1],
+  "Leche o suero":                [88, 0.50, 25, 1],
+  "Humus de lombriz":             [40, 1.50, 12, 1],
+  "Melaza o azúcar":              [25, 0.80, 30, 1],
+  "Inóculo (tierra de monte)":     [30, 0.30, 15, 0.8],
+  "Biol viejo (arranque)":        [95, 0.30, 15, 1],
+  "Biochar":                      [10, 0.60, 0, 0],
+  "Ceniza de madera":             [5,  0.00, 0, 0],
+  "Arcilla de la zona":           [20, 0.10, 0, 0]
+};
+const OBJC = 30, OBJB = 25, HMINC = 50, HMAXC = 60, SOLMIN = 10, SOLMAX = 20;
+
+let filasC = [], filasB = [];
+function nuevaC(n, kg){ const m = MATC[n] || [50,1,25]; return {nombre:n, kg:kg||"", hum:m[0], n:m[1], cn:m[2]}; }
+function nuevaB(n, kg){ const m = MATB[n] || [50,1,25]; return {nombre:n, kg:kg||"", n:m[1], cn:m[2]}; }
+
+function modo(m){
+  document.getElementById('secCompost').classList.toggle('oculto', m !== 'compost');
+  document.getElementById('secBiol').classList.toggle('oculto', m !== 'biol');
+  document.getElementById('secBocashi').classList.toggle('oculto', m !== 'bocashi');
+  document.getElementById('btnCompost').classList.toggle('on', m === 'compost');
+  document.getElementById('btnBiol').classList.toggle('on', m === 'biol');
+  document.getElementById('btnBocashi').classList.toggle('on', m === 'bocashi');
+}
+
+function chip(cn){ if(cn <= 0) return ''; return cn < 20 ? '<span class="chip verde">verde</span>' : (cn <= 30 ? '<span class="chip amar">equilibrado</span>' : '<span class="chip marron">marrón</span>'); }
+function options(lista, sel){ return Object.keys(lista).map(k=>'<option value="' + k + '"' + (k===sel?' selected':'') + '>' + k + '</option>').join(''); }
+
+function agregarC(n){ filasC.push(nuevaC(n || "Restos de cocina / fruta")); dibujarC(); }
+function presetC(k){ const p = {vaca:"Estiércol de vaca (fresco)", vegetal:"Restos de cocina / fruta", seco:"Hojas secas"}; agregarC(p[k]); }
+function borrarC(i){ filasC.splice(i,1); dibujarC(); }
+function reiniciarC(){ filasC = [nuevaC("Estiércol de vaca (fresco)"), nuevaC("Hojas secas")]; dibujarC(); }
+function setC(i,k,v){
+  filasC[i][k] = v;
+  if(k === "nombre"){ const m = MATC[v] || [50,1,25]; filasC[i].hum = m[0]; filasC[i].n = m[1]; filasC[i].cn = m[2]; dibujarC(); return; }
+  calcularC();
+}
+function dibujarC(){
+  document.getElementById('filasC').innerHTML = filasC.map(function(f,i){ return '<tr>' +
+    '<td><select onchange="setC(' + i + ',\'nombre\',this.value)">' + options(MATC, f.nombre) + '</select></td>' +
+    '<td class="tipo">' + chip(parseFloat(f.cn)||0) + '</td>' +
+    '<td><input type="number" min="0" step="0.1" value="' + f.kg + '" placeholder="0" oninput="setC(' + i + ',\'kg\',this.value)"></td>' +
+    '<td><input type="number" min="0" max="100" value="' + f.hum + '" oninput="setC(' + i + ',\'hum\',this.value)"></td>' +
+    '<td><input type="number" min="0" step="0.05" value="' + f.n + '" oninput="setC(' + i + ',\'n\',this.value)"></td>' +
+    '<td><input type="number" min="0" value="' + f.cn + '" oninput="setC(' + i + ',\'cn\',this.value)"></td>' +
+    '<td><button class="del" onclick="borrarC(' + i + ')">✕</button></td></tr>'; }).join("");
+  calcularC();
+}
+
+function calcularC(){
+  const g = function(id){ return document.getElementById(id); };
+  let kgF = 0, seco = 0, N = 0, C = 0, Cef = 0;
+  for(const f of filasC){
+    const kg = parseFloat(f.kg) || 0; if(kg <= 0) continue;
+    const m = MATC[f.nombre] || [50,1,25,1];
+    const fr = (m[3] === undefined ? 1 : m[3]);
+    const h = Math.min(100, Math.max(0, parseFloat(f.hum)||0))/100;
+    const pcN = Math.max(0, parseFloat(f.n)||0)/100;
+    const cn = Math.max(0, parseFloat(f.cn)||0);
+    const s = kg*(1-h), n = s*pcN;
+    kgF += kg; seco += s; N += n; C += n*cn; Cef += n*cn*fr;
+  }
+  g('cKg').textContent = kgF ? kgF.toFixed(1) + " kg" : "—";
+  g('cSeco').textContent = seco ? seco.toFixed(1) + " kg" : "—";
+  g('cN').textContent = N ? (N*1000).toFixed(0) + " g" : "—";
+  if(!seco || !N){
+    g('cCN').textContent = "—"; g('cHum').textContent = "—"; g('cAguja').style.left = "50%";
+    g('cVeredicto').className = "verdict"; g('cVeredicto').textContent = "Cargá algún material para empezar.";
+    g('cArreglo').innerHTML = ""; g('txtC').value = ""; return;
+  }
+  const cnNom = C/N;
+  const cnMix = Cef > 0 ? Cef/N : cnNom;   // el efectivo: lo que los microbios realmente ven
+  const humMix = (1 - seco/kgF)*100;
+  const difCn = Math.abs(cnMix - cnNom) > 1.5;
+  g('cCN').innerHTML = cnMix.toFixed(1) + ":1" + (difCn ? " <small style=\"color:#666\">(nominal " + cnNom.toFixed(1) + ")</small>" : "");
+  let estado = "", col = "#2e7d32";
+  if(humMix > HMAXC){ estado = "pasada"; col = "#c62828"; } else if(humMix < HMINC){ estado = "seca"; col = "#f9a825"; }
+  g('cHum').innerHTML = humMix.toFixed(0) + " % <small style=\"color:" + col + "\">(" + (estado || "en rango") + ")</small>";
+  g('cAguja').style.left = posGauge(cnMix, 5, 80) + "%";
+
+  let v = g('cVeredicto');
+  if(cnMix < 15){ v.className = "verdict bad"; v.textContent = "Te sobra nitrógeno. C/N " + cnMix.toFixed(1) + ":1 — abajo de 15 se pierde como amoníaco."; }
+  else if(cnMix < 25){ v.className = "verdict warn"; v.textContent = "Un poco bajo. C/N " + cnMix.toFixed(1) + ":1 — sirve, pero conviene subir un poco el carbono."; }
+  else if(cnMix <= 35){
+    if(humMix < HMINC - 3){ v.className = "verdict warn"; v.textContent = "El C/N está en el rango justo (" + cnMix.toFixed(1) + ":1), pero la humedad no: " + humMix.toFixed(0) + "%. Primero humedeces, después a compostar."; }
+    else if(humMix > HMAXC + 3){ v.className = "verdict warn"; v.textContent = "El C/N está bien (" + cnMix.toFixed(1) + ":1), pero está pasada de agua: " + humMix.toFixed(0) + "%. Agregá material seco y volteá."; }
+    else { v.className = "verdict ok"; v.textContent = "Está en el rango justo. C/N " + cnMix.toFixed(1) + ":1. Con la humedad en " + humMix.toFixed(0) + "%, a compostar."; }
+  }
+  else if(cnMix <= 50){ v.className = "verdict warn"; v.textContent = "Un poco alto. C/N " + cnMix.toFixed(1) + ":1 — va a compostar lento; se puede agregar nitrógeno."; }
+  else { v.className = "verdict bad"; v.textContent = "Te sobra carbono. C/N " + cnMix.toFixed(1) + ":1 — así casi no se calienta."; }
+
+  let html = "";
+  if(Math.abs(cnMix - OBJC) > 3){
+    const opciones = ["Restos de cocina / fruta","Pasto o césped fresco","Estiércol de gallina","Estiércol de vaca (fresco)",
+                      "Estiércol de cerdo","Estiércol de vaca (seco)","Hojas secas","Pasto seco / rastrojo",
+                      "Aserrín (madera blanda)","Cartón trozado","Paja de cereal"];
+    const sirven = [], vanMal = [];
+    for(const k of opciones){
+      const m = MATC[k], h = m[0], pcN = m[1], cn = m[2]*(m[3] === undefined ? 1 : m[3]);
+      if(Math.abs(cn - OBJC) < 1e-9) continue;
+      const nNec = (OBJC*N - Cef)/(cn - OBJC);
+      const kg = nNec/((1 - h/100)*(pcN/100));
+      if(kg > 0.01 && kg < 1e6) sirven.push({k:k, kg:kg}); else vanMal.push(k);
+    }
+    sirven.sort(function(a,b){ return a.kg-b.kg; });
+    if(sirven.length){
+      html = "<b>Para llevar el C/N a 30:1</b><br>" + sirven.slice(0,3).map(function(s){ return "• " + s.kg.toFixed(1) + " kg de <b>" + s.k + "</b>"; }).join("<br>") +
+             "<br><span style=\"color:#666;font-size:12px\">Se calcula con los kg frescos, tal como los pesás.</span>";
+    } else html = "<b>Con estos materiales no llegás a 30:1.</b> ";
+    if(cnMix > OBJC){
+      html += "<br><span style=\"font-size:13px\">Estás por encima del objetivo, así que necesitás un material con C/N <b>menor</b> a 30, o sea de los verdes." +
+              (vanMal.length ? " Los que tenés cargados no sirven para esto: " + vanMal.slice(0,4).join(", ") + " ya están en 30 o por encima." : "") + "</span>";
+    } else {
+      html += "<br><span style=\"font-size:13px\">Estás por debajo del objetivo, así que necesitás un material con C/N <b>mayor</b> a 30, o sea de los secos." +
+              (vanMal.length ? " Los verdes y los estiércoles ya están por debajo de 30, así que no te van a subir el ratio." : "") + "</span>";
+    }
+  }
+  // agua en litros, igual que en el biol
+  const humObj = (HMINC + HMAXC)/2/100;               // 55 %
+  const aguaC = Math.max(0, seco/(1 - humObj) - kgF); // litros a agregar
+  if(humMix > HMAXC + 3) html += "<br><br><b>Humedad de tu mezcla:</b> " + humMix.toFixed(0) + "%, está pasada (el ideal es 50 a 60). Agregá material seco y volteá.";
+  else if(humMix < HMINC - 3) html += "<br><br><b>Humedad de tu mezcla:</b> " + humMix.toFixed(0) + "%, está seca. Para llevarla al 55% necesitás unos <b>" + aguaC.toFixed(0) +
+        " litros de agua</b> sobre estos " + kgF.toFixed(0) + " kg. <b>El aserrín tarda en absorber</b>: si podés, humedecelo un día antes. " +
+        "Va por capas, regando y volteando. Chequeo con el puño: tiene que salir una o dos gotas, no un chorro.";
+  else html += "<br><br><b>Humedad de tu mezcla:</b> " + humMix.toFixed(0) + "%, está en rango. Se mantiene durante todo el proceso: reponé lo que se evapora volteando y regando por capas.";
+  // volumen mínimo para que caliente
+  if(kgF < 300){
+    html += "<br><br><b>Tamaño de la pila:</b> con " + kgF.toFixed(0) + " kg frescos queda chica para levantar temperatura. Apuntá a un metro cúbico " +
+            "(más o menos 300 a 500 kg de mezcla húmeda) para que caliente e higienice. Si no llegás, igual compostea, pero más lento y sin pasteurizar.";
+  } else html += "<br><br><b>Tamaño de la pila:</b> " + kgF.toFixed(0) + " kg es buen volumen: con eso levanta temperatura.";
+  // fibra del aserrín
+  if(filasC.some(function(f){ return ((parseFloat(f.kg)||0) > 0) && (f.nombre.indexOf("Aserrín") >= 0 || f.nombre.indexOf("Viruta") >= 0); })){
+    html += "<br><br><b>Si usás aserrín o viruta:</b> el 400 de la tabla es el valor en papel. La lignina de la madera se degrada lento, así que el C/N real baja más despacio y el aserrín puede quedar meses sin descomponerse, con astillas en el producto final. " +
+            "Conviene el aserrín fino, de varias maderas, y mezclar una parte con un marrón más blando como paja o poda triturada.";
+  }
+  // sanidad si hay cerdo
+  if(filasC.some(function(f){ return ((parseFloat(f.kg)||0) > 0) && f.nombre.indexOf("cerdo") >= 0; })){
+    html += "<br><br><b>Sanidad con estiércol de cerdo:</b> aunque esté seco, puede traer patógenos y parásitos. Para que el compost sea seguro la pila tiene que llegar a <b>55 °C o más varios días seguidos</b>, " +
+            "volteando para que todo el material pase por el centro. Si va a una huerta de consumo, dejalo madurar bien antes de aplicar.";
+  }
+  g('cArreglo').innerHTML = html;
+  queHacer('c', cnMix, humMix, kgF, seco);
+  genTexto('c', cnMix, humMix, kgF, seco, N, C, 0, kgF, 0, cnNom);
+}
+
+function agregarB(n){ filasB.push(nuevaB(n || "Malezas / pasto verde")); dibujarB(); }
+function presetB(k){ const p = {bosta:"Bosta de cerdo", verde:"Malezas / pasto verde", seco:"Hojas secas otoñales", leche:"Leche o suero", melaza:"Melaza o azúcar"}; agregarB(p[k]); }
+function borrarB(i){ filasB.splice(i,1); dibujarB(); }
+function reiniciarB(){ filasB = [nuevaB("Bosta de cerdo"), nuevaB("Malezas / pasto verde"), nuevaB("Hojas secas otoñales")]; dibujarB(); }
+function setB(i,k,v){
+  filasB[i][k] = v;
+  if(k === "nombre"){ const m = MATB[v] || [50,1,25]; filasB[i].n = m[1]; filasB[i].cn = m[2]; dibujarB(); return; }
+  calcularB();
+}
+function dibujarB(){
+  document.getElementById('filasB').innerHTML = filasB.map(function(f,i){ return '<tr>' +
+    '<td><select onchange="setB(' + i + ',\'nombre\',this.value)">' + options(MATB, f.nombre) + '</select></td>' +
+    '<td class="tipo">' + chip(parseFloat(f.cn)||0) + '</td>' +
+    '<td><input type="number" min="0" step="0.1" value="' + f.kg + '" placeholder="0" oninput="setB(' + i + ',\'kg\',this.value)"></td>' +
+    '<td><input type="number" min="0" step="0.05" value="' + f.n + '" oninput="setB(' + i + ',\'n\',this.value)"></td>' +
+    '<td><input type="number" min="0" value="' + f.cn + '" oninput="setB(' + i + ',\'cn\',this.value)"></td>' +
+    '<td><button class="del" onclick="borrarB(' + i + ')">✕</button></td></tr>'; }).join("");
+  calcularB();
+}
+
+function calcularB(){
+  const g = function(id){ return document.getElementById(id); };
+  let kgF = 0, seco = 0, N = 0, C = 0, Cef = 0, totCeniza = 0, totInorg = 0;
+  for(const f of filasB){
+    const kg = parseFloat(f.kg) || 0; if(kg <= 0) continue;
+    const m = MATB[f.nombre] || [50,1,25,1];
+    const h = Math.min(100, Math.max(0, m[0]))/100;
+    const pcN = Math.max(0, parseFloat(f.n)||0)/100;
+    const cn = Math.max(0, parseFloat(f.cn)||0);
+    const s = kg*(1-h);
+    kgF += kg; seco += s;
+    if(cn > 0){ const n = s*pcN; N += n; C += n*cn; Cef += n*cn*(m[3] === undefined ? 1 : m[3]); }
+    if(f.nombre.indexOf("Ceniza") >= 0) totCeniza += kg;
+    if(f.nombre.indexOf("Biochar") >= 0 || f.nombre.indexOf("Arcilla") >= 0) totInorg += kg;
+  }
+  const tacho = Math.max(1, parseFloat(g('bTacho').value) || 200);
+  const aguaPuesta = Math.max(0, parseFloat(g('bAgua').value) || 0);
+  g('bAguja').style.left = "50%";
+  if(!seco || !N){
+    g('bCN').textContent = "—"; g('bSolidos').textContent = "—"; g('bAguaFalta').textContent = "—"; g('bUso').textContent = "—";
+    g('bVeredicto').className = "verdict"; g('bVeredicto').textContent = "Cargá algún material para empezar.";
+    g('bArreglo').innerHTML = ""; g('txtB').value = ""; return;
+  }
+  const cnNom = C/N;
+  const cnMix = Cef > 0 ? Cef/N : cnNom;
+  const solObj = (SOLMIN + SOLMAX)/2;
+  const totalObj = seco/(solObj/100);
+  const aguaNecesaria = Math.max(0, totalObj - kgF);          // lo que pide la dilución
+  const aguaMaxFisica = Math.max(0, tacho - kgF - aguaPuesta); // lo que entra en el tacho
+  const noEntra = (kgF + aguaPuesta) > tacho;                  // los materiales solos ya se pasan
+  const aguaRecomendada = Math.min(aguaNecesaria, aguaMaxFisica);
+  const aguaFaltante = Math.max(0, aguaRecomendada - aguaPuesta);
+  const faltaEspacio = (!noEntra) && (aguaNecesaria > aguaMaxFisica + 0.5);
+  const solidos = seco/Math.max(0.001, (kgF + aguaPuesta))*100;
+  const usoIdeal = (kgF + aguaPuesta + aguaRecomendada)/tacho*100;
+  const usoReal = (kgF + aguaPuesta)/tacho*100;
+
+  const ccol = (cnMix < 20) ? "#f9a825" : (cnMix <= 30 ? "#2e7d32" : "#c62828");
+  g('bCN').innerHTML = cnMix.toFixed(1) + ":1" + (Math.abs(cnMix - cnNom) > 1.5 ? " <small style=\"color:#666\">(nominal " + cnNom.toFixed(1) + ")</small>" : "") + " <small style=\"color:" + ccol + "\">" + (cnMix < 20 ? "(bajo)" : (cnMix <= 30 ? "(en rango)" : "(alto)")) + "</small>";
+  const scol = (solidos < SOLMIN) ? "#f9a825" : (solidos <= SOLMAX ? "#2e7d32" : "#c62828");
+  g('bSolidos').innerHTML = solidos.toFixed(0) + " % <small style=\"color:" + scol + "\">(" + (solidos < SOLMIN ? "aguado" : (solidos <= SOLMAX ? "en rango" : "muy espeso")) + ")</small>";
+  g('bAguaFalta').innerHTML = aguaFaltante > 0.5 ? aguaFaltante.toFixed(0) + " L" : "<small>ya está</small>";
+  if(noEntra) g('bUso').innerHTML = usoReal.toFixed(0) + " % <small style=\"color:#c62828\">(no entra)</small>";
+  else if(aguaPuesta > aguaMaxFisica + 0.5) g('bUso').innerHTML = usoReal.toFixed(0) + " % <small style=\"color:#c62828\">(pasado)</small>";
+  else g('bUso').innerHTML = usoIdeal.toFixed(0) + " % <small style=\"color:" + (usoIdeal < 70 ? "#f9a825" : "#2e7d32") + "\">(con el agua)</small>";
+  g('bAguja').style.left = posGauge(cnMix, 10, 60) + "%";
+
+  let v = g('bVeredicto');
+  if(cnMix < 15){ v.className = "verdict bad"; v.textContent = "Muy cargado de nitrógeno (C/N " + cnMix.toFixed(1) + "). Se puede, pero se pierde nitrógeno como amoníaco."; }
+  else if(cnMix < 20){ v.className = "verdict warn"; v.textContent = "Un poco bajo (C/N " + cnMix.toFixed(1) + "). El anaerobio trabaja mejor entre 20 y 30."; }
+  else if(cnMix <= 30){ v.className = "verdict ok"; v.textContent = "Está en el rango del anaerobio (C/N " + cnMix.toFixed(1) + "). Ahora importa el agua y el hermético."; }
+  else if(cnMix <= 40){ v.className = "verdict warn"; v.textContent = "Un poco alto (C/N " + cnMix.toFixed(1) + "). La fermentación va a ser más lenta."; }
+  else { v.className = "verdict bad"; v.textContent = "Muy cargado de carbono (C/N " + cnMix.toFixed(1) + "). Así fermenta mal y despacio."; }
+
+  let html = "";
+  const usoFinal = usoIdeal;
+  if(noEntra){
+    html += "<b>No entra:</b> con " + kgF.toFixed(0) + " kg de materiales y " + aguaPuesta.toFixed(0) + " L de agua ya estás en " + usoReal.toFixed(0) +
+            "% de un tacho de " + tacho + " L. El tacho es el límite físico: no se puede pasar. Dos caminos: usá un tacho de " +
+            Math.ceil((kgF + aguaPuesta)/0.75) + " L o más, o bajá la receta a " + (tacho/(kgF + aguaPuesta)*100).toFixed(0) +
+            "% de estos materiales (unos " + (kgF*tacho/(kgF + aguaPuesta)).toFixed(0) + " kg en vez de " + kgF.toFixed(0) + ").";
+  } else if(faltaEspacio){
+    html += "<b>Agua:</b> la dilución pide <b>" + aguaNecesaria.toFixed(0) + " L</b>, pero en el tacho de " + tacho + " L solo entran <b>" + aguaMaxFisica.toFixed(0) +
+            " L</b> junto con los materiales. <b>No te da el tacho para esta receta.</b> Con lo que entra te quedás en " + (seco/(kgF + aguaPuesta + aguaMaxFisica)*100).toFixed(0) +
+            "% de sólidos (el ideal es 10 a 20). Dos caminos: un tacho de " + Math.ceil((seco/0.15)/0.75) + " L o más, o bajá la receta a unos " +
+            (tacho*0.75/(seco/0.15)*kgF).toFixed(0) + " kg de estos materiales.";
+  } else if(aguaPuesta > aguaMaxFisica + 0.5){
+    html += "<b>Agua:</b> le cargaste " + aguaPuesta.toFixed(0) + " L y al tacho de " + tacho + " L solo le entran " + aguaMaxFisica.toFixed(0) +
+            " L con estos materiales. Sacá agua o material.";
+  } else if(aguaFaltante > 0.5){
+    html += "<b>Agua:</b> agregá <b>" + aguaFaltante.toFixed(0) + " litros</b> (la receta pide " + aguaNecesaria.toFixed(0) + " L en total para " + kgF.toFixed(0) +
+            " kg de materiales, y ya cargaste " + aguaPuesta.toFixed(0) + " L). Con eso el tacho queda al " + usoIdeal.toFixed(0) + "%.";
+  } else if(solidos > SOLMAX + 2){
+    html += "<b>Agua:</b> está muy espeso (" + solidos.toFixed(0) + "% de sólidos). Agregá agua hasta bajar al 15%: unos " + aguaNecesaria.toFixed(0) + " litros.";
+  } else html += "<b>Agua:</b> " + aguaNecesaria.toFixed(0) + " litros en total, y con lo que cargaste está bien de dilución.";
+  // nivel de llenado: poco volumen = mucho aire arriba
+  if(!noEntra){
+    if(usoFinal < 70){
+      html += "<br><br><b>Nivel de llenado:</b> te queda en " + usoFinal.toFixed(0) + "% del tacho. Con menos del 70% queda mucho aire arriba y el arranque se vuelve aerobio. " +
+              "Achicá el tacho (uno de " + Math.ceil((kgF + aguaPuesta + aguaRecomendada)/0.75) + " L te deja al 75%) o escalá la receta.";
+    } else html += "<br><br><b>Nivel de llenado:</b> " + usoFinal.toFixed(0) + "% del tacho, bien: arriba del 70% queda poco aire.";
+  }
+  // el gas
+  html += "<br><br><b>El gas:</b> si lo cerrás hermético del todo, la fermentación lo va a inflar. Poné una <b>trampa de agua</b>: una manguera desde la tapa hasta una botella con agua, " +
+          "así sale el gas y no entra aire. La otra opción es abrir la tapa un instante cada semana, más simple pero deja entrar algo de oxígeno.";
+  // fibra
+  html += "<br><br><b>Sobre el carbono:</b> en el biol el carbono de la fibra (hojas, paja, aserrín) aporta poco: en líquido y sin aire casi no se degrada. " +
+          "Lo que alimenta de verdad son los azúcares (melaza) y el nitrógeno disponible. Así que si el C/N te da bien por las hojas, tomalo con pinzas.";
+  // inoculo
+  if(!filasB.some(function(f){ return ((parseFloat(f.kg)||0) > 0) && (f.nombre.indexOf("Inóculo") >= 0 || f.nombre.indexOf("Biol viejo") >= 0 || f.nombre.indexOf("tierra") >= 0); })){
+    html += "<br><br><b>Inóculo:</b> no cargaste ninguno. Un balde de tierra de monte o de bosta fresca de vaca arranca la fermentación con los microbios correctos.";
+  }
+  if(Math.abs(cnMix - OBJB) > 4){
+    // en el biol, la melaza (azúcar) es la que sube el C/N efectivo; la fibra casi no cuenta
+    const nom = ["Melaza o azúcar","Bosta de cerdo","Bosta de gallina","Malezas / pasto verde","Leche o suero","Hojas secas otoñales","Pasto seco / rastrojo","Paja"];
+    const sirven = [];
+    for(const k of nom){
+      const m = MATB[k], h = m[0], pcN = m[1], cn = m[2]*(m[3] === undefined ? 1 : m[3]);
+      if(cn <= 0 || Math.abs(cn - OBJB) < 1e-9) continue;
+      const nNec = (OBJB*N - Cef)/(cn - OBJB);
+      const kg = nNec/((1 - h/100)*(pcN/100));
+      if(kg > 0.01 && kg < 1e5) sirven.push({k:k, kg:kg});
+    }
+    sirven.sort(function(a,b){ return a.kg-b.kg; });
+    if(sirven.length){
+      html += "<br><br><b>Para llevar el C/N a 25:</b><br>" + sirven.slice(0,3).map(function(s){ return "• " + s.kg.toFixed(1) + " kg de <b>" + s.k + "</b>"; }).join("<br>");
+    }
+    if(cnMix > OBJB) html += "<br><span style=\"font-size:13px\">Estás por encima: necesitás algo con C/N <b>menor</b> a 25, o sea más nitrogenado.</span>";
+    else html += "<br><span style=\"font-size:13px\">Estás por debajo: necesitás algo con C/N <b>mayor</b> a 25, o sea más seco o más fibroso.</span>";
+  }
+  const volFinal = kgF + aguaPuesta + aguaFaltante;
+  if(filasB.some(function(f){ return ((parseFloat(f.kg)||0) > 0) && f.nombre.indexOf("cerdo") >= 0; })){
+    html += "<br><br><b>Si usás bosta de cerdo:</b> tiene más riesgo sanitario que la de rumiantes (patógenos y parásitos), y si los cerdos comen balanceado puede traer cobre y zinc. " +
+            "Aplicalo diluido, 1 litro en 10 a 20 de agua, al suelo, y no sobre hojas de verdura que se comen crudas cerca de la cosecha.";
+  }
+  if(totCeniza > 0){
+    const pc = totCeniza/volFinal*100;
+    if(pc > 1) html += "<br><br><b>Ceniza:</b> estás en " + pc.toFixed(1) + "% del volumen final. El protocolo pide <b>máximo 1%</b>: sacá un poco, porque sube el pH.";
+    else html += "<br><br><b>Ceniza:</b> " + pc.toFixed(1) + "% del volumen final, dentro del 1% que pide el protocolo.";
+  }
+  if(totInorg > 0){
+    html += "<br><b>Biochar y arcilla:</b> " + (totInorg/volFinal*100).toFixed(1) + "% del volumen final. El biochar va alrededor del 2%.";
+  }
+  g('bArreglo').innerHTML = html;
+  queHacer('b', cnMix, solidos, kgF, seco, usoIdeal);
+  genTexto('b', cnMix, solidos, kgF, seco, N, C, aguaFaltante, volFinal, tacho, cnNom);
+}
+
+function pintarBarra(id, min, max, bandas){
+  // bandas: [desde, hasta, color, etiqueta]
+  const cont = document.getElementById(id);
+  if(!cont || !cont.innerHTML === undefined) {}
+  let h = "";
+  for(const b of bandas){
+    const izq = (b[0] - min)/(max - min)*100, der = (b[1] - min)/(max - min)*100;
+    if(der <= 0 || izq >= 100) continue;
+    const i2 = Math.max(0, izq), d2 = Math.min(100, der);
+    h += '<div class="zona" style="left:' + i2 + '%;width:' + (d2 - i2) + '%;background:' + b[2] + '"></div>';
+    if(b[3]){
+      h += '<div class="zonaLbl" style="left:' + ((i2 + d2)/2) + '%">' + b[3] + '</div>';
+    }
+  }
+  if(cont) cont.innerHTML = h;
+}
+// resume lo que hay que hacer, en orden
+function queHacer(cual, cnMix, segundo, kgF, seco, uso){
+  const esC = cual === 'c';
+  const el = document.getElementById(esC ? 'cHacer' : 'bHacer');
+  if(!el) return;
+  const pasos = [];
+  if(esC){
+    if(segundo < HMINC - 3) pasos.push("Humedecé la pila: está seca. Va por capas, regando y volteando.");
+    else if(segundo > HMAXC + 3) pasos.push("Está pasada de agua: agregá material seco y volteá.");
+    if(cnMix < 15) pasos.push("Sobra nitrógeno: sumá material seco.");
+    else if(cnMix > 40) pasos.push("Sobra carbono: sumá verde o estiércol, o esperá más tiempo.");
+    if(kgF < 300) pasos.push("La pila es chica: junta un metro cúbico para que caliente.");
+  } else {
+    if(uso && uso > 100) pasos.push("No entra en el tacho: achicá la receta o usá uno más grande.");
+    else if(uso && uso < 70) pasos.push("Llenala más (al 70-80%): con menos aire arriba arranca aerobio.");
+    if(segundo > SOLMAX + 2) pasos.push("Está muy espeso: agregá agua.");
+    else if(segundo < SOLMIN - 2) pasos.push("Está muy aguado: agregá material.");
+    if(cnMix < 20) pasos.push("Falta carbono aprovechable: en el biol eso se arregla con melaza o azúcar, no con fibra (las hojas y la paja casi no se degradan en líquido).");
+    else if(cnMix > 30) pasos.push("Sobra carbono: más bosta o más verde, y menos fibra.");
+    pasos.push("Cerrá con trampa de agua y dejalo 30 a 90 días.");
+  }
+  el.innerHTML = pasos.length
+    ? '<div class="qh">Qué hacer</div>' + pasos.map(function(s, i){ return (i+1) + ". " + s; }).join("<br>")
+    : '<div class="qh">Todo en orden</div>Los números están en rango. Ahora lo que manda es el proceso: olor, temperatura y paciencia.';
+}
+function posGauge(cn, min, max){ return (Math.min(max, Math.max(min, cn)) - min)/(max - min)*100; }
+function escala(id, min, max, marcas){
+  document.getElementById(id).innerHTML = marcas.map(function(t){ return '<span style="left:' + ((t-min)/(max-min)*100) + '%">' + t + '</span>'; }).join("");
+}
+
+// ================== BOCASHI ==================
+// marrones y estiércoles que se pueden elegir (humedad %)
+const MARRONES = {
+  "Paja de trigo": 15, "Rastrojo de maíz": 20, "Hojas secas": 12, "Cáscara de arroz": 12,
+  "Aserrín": 20, "Cartón trozado": 8, "Pasto seco": 15, "Viruta": 20
+};
+// en el bocashi va el estiércol seco o ya apilado, no el fresco del día:
+// si va fresco, sale demasiado húmedo y hay que compensar con más paja
+const EXCREMENTOS = {
+  "Estiércol de gallina (seco)": 30, "Estiércol de vaca (seco)": 40,
+  "Estiércol de cabra (seco)": 25, "Estiércol de oveja (seco)": 30,
+  "Estiércol de cerdo (seco deshidratado)": 12, "Estiércol de caballo (seco)": 30
+};
+// filas fijas de la receta: [nombre, % sobre la mezcla, humedad %, es elección?]
+let filasK = [];
+function recetaK(){
+  return [
+    { n:"Paja de trigo",        pc:45, h:MARRONES["Paja de trigo"],   tipo:"marron" },
+    { n:"Estiércol de gallina (seco)", pc:30, h:EXCREMENTOS["Estiércol de gallina (seco)"], tipo:"excr" },
+    { n:"Afrecho o salvado",    pc:10, h:12,  tipo:"" },
+    { n:"Ceniza",               pc:2,  h:5,   tipo:"" },
+    { n:"Carbón o biochar",     pc:2,  h:10,  tipo:"" },
+    { n:"Tierra de monte",      pc:5,  h:20,  tipo:"" },
+    { n:"Azúcar o melaza",      pc:1,  h:10,  tipo:"" },
+    { n:"Levadura de pan",      pc:0.2,h:5,   tipo:"" }
+  ];
+}
+function reiniciarK(){ filasK = recetaK(); dibujarK(); }
+function dibujarK(){
+  if(!filasK.length) filasK = recetaK();
+  const tam = parseFloat(document.getElementById('kTam').value) || 100;
+  const totalPc = filasK.reduce(function(a,f){ return a + (parseFloat(f.pc)||0); }, 0) || 1;
+  let h = '';
+  filasK.forEach(function(f, i){
+    const kg = tam * (parseFloat(f.pc)||0) / totalPc;
+    let selector = '';
+    if(f.tipo === 'marron') selector = '<select onchange="cambiarK(' + i + ', this.value, 1)">' + Object.keys(MARRONES).map(function(k){ return '<option' + (k === f.n ? ' selected' : '') + '>' + k + '</option>'; }).join('') + '</select>';
+    if(f.tipo === 'excr') selector = '<select onchange="cambiarK(' + i + ', this.value, 2)">' + Object.keys(EXCREMENTOS).map(function(k){ return '<option' + (k === f.n ? ' selected' : '') + '>' + k + '</option>'; }).join('') + '</select>';
+    const celda = f.tipo ? selector : ('<b>' + f.n + '</b>');
+    const esAzucar = /Azúcar|melaza/i.test(f.n), esLevadura = /Levadura/i.test(f.n);
+    const cuantos = esAzucar || esLevadura
+      ? '<b>' + (kg*1000).toFixed(0) + ' g</b> <small style="color:#666">(' + kg.toFixed(2) + ' kg)</small>'
+      : '<b>' + kg.toFixed(1) + ' kg</b>';
+    h += '<tr><td>' + celda + '</td>'
+      + '<td><input type="number" step="0.1" value="' + f.pc + '" style="width:70px" oninput="filasK[' + i + '].pc=parseFloat(this.value)||0; dibujarK();"> %</td>'
+      + '<td>' + cuantos + '</td></tr>';
+  });
+  document.getElementById('filasK').innerHTML = h;
+  calcularK();
+}
+function cambiarK(i, valor, cual){
+  filasK[i].n = valor;
+  filasK[i].h = cual === 1 ? MARRONES[valor] : EXCREMENTOS[valor];
+  dibujarK();
+}
+function aplicarTam(){ dibujarK(); }
+function calcularK(){
+  const g = function(id){ return document.getElementById(id); };
+  const tam = parseFloat(g('kTam').value) || 100;
+  const totalPc = filasK.reduce(function(a,f){ return a + (parseFloat(f.pc)||0); }, 0) || 1;
+  let kgF = 0, seco = 0, azucar = 0, levadura = 0;
+  filasK.forEach(function(f){
+    const kg = tam * (parseFloat(f.pc)||0) / totalPc;
+    kgF += kg; seco += kg*(1 - (f.h||0)/100);
+    if(/Azúcar|melaza/i.test(f.n)) azucar += kg;
+    if(/Levadura/i.test(f.n)) levadura += kg;
+  });
+  // el bocashi va más seco que el compost: 35 a 40%
+  const agua = Math.max(0, seco/(1 - 0.38) - kgF);
+  g('kTotal').textContent = kgF.toFixed(0) + ' kg';
+  g('kAzucar').innerHTML = (azucar*1000).toFixed(0) + ' g <small style="color:#666">(' + azucar.toFixed(2) + ' kg)</small>';
+  g('kLevadura').innerHTML = (levadura*1000).toFixed(0) + ' g <small style="color:#666">(' + levadura.toFixed(2) + ' kg)</small>';
+  g('kAgua').innerHTML = agua.toFixed(0) + ' L';
+  // qué hacer, según el tamaño
+  const pasos = [];
+  if(tam <= 100) pasos.push("Tanda chica: se seca rápido. Revisá la humedad cada 2 días y tapala con lona o media sombra.");
+  else pasos.push("Tanda grande: junta calor sola. Si pasa de 45 °C, volteá.");
+  pasos.push(tam <= 100 ? "Volteá una vez por día los primeros 3 días." : "Volteá dos veces por día los primeros 7 a 10 días.");
+  pasos.push("Molé el azúcar en el agua y rociá por capas, mezclando. Prueba del puño: apretás y NO tiene que gotear.");
+  pasos.push("A los 15 a 20 días está: frío, seco y con olor dulzón a fermento.");
+  g('kHacer').innerHTML = '<div class="qh">Qué hacer</div>' + pasos.map(function(s,i){ return (i+1) + '. ' + s; }).join('<br>');
+  g('kVeredicto').innerHTML = 'Tanda de <b>' + kgF.toFixed(0) + ' kg</b> de mezcla. Va con <b>' + agua.toFixed(0) + ' litros</b> de agua, hasta quedar al 38% de humedad (más seco que el compost).';
+  g('kDetalle').innerHTML = '<b>Por qué la proporción no cambia con el tamaño</b><br>El azúcar y la levadura van siempre igual, en proporción a la mezcla: no es que una carrada necesite "más azúcar por kilo". '
+    + 'Lo que cambia es el agua que se evapora (en chico mucho más) y los volteos (en grande hacen falta más días, porque tarda más en enfriar). '
+    + 'Si te queda poca cantidad, igual funciona: fermenta, solo que más lento y más parejo.';
+  genTextoK(kgF, seco, azucar, levadura, agua, tam);
+}
+
+function genTextoK(kgF, seco, azucar, levadura, agua, tam){
+  const hoy = new Date().toLocaleDateString('es-AR');
+  const totalPc = filasK.reduce(function(a,f){ return a + (parseFloat(f.pc)||0); }, 0) || 1;
+  let s = "# Receta de bocashi\n\n**Fecha:** " + hoy + "\n\n**Tamaño de la tanda:** " + kgF.toFixed(0) + " kg de mezcla\n\n## Ingredientes\n\n| Ingrediente | % de la mezcla | Cuánto va |\n|---|---|---|\n";
+  filasK.forEach(function(f){
+    const kg = tam * (parseFloat(f.pc)||0) / totalPc;
+    const cuanto = /Azúcar|melaza|Levadura/i.test(f.n) ? (kg*1000).toFixed(0) + " g" : kg.toFixed(1) + " kg";
+    s += "| " + f.n + " | " + f.pc + " % | " + cuanto + " |\n";
+  });
+  s += "\n## Para armar\n\n";
+  s += "- **Agua:** " + agua.toFixed(0) + " litros, hasta el 38% de humedad (más seco que el compost: prueba del puño, apretás y no gotea)\n";
+  s += "- **Azúcar o melaza:** " + (azucar*1000).toFixed(0) + " g\n- **Levadura:** " + (levadura*1000).toFixed(0) + " g\n";
+  s += "- **Sin sal y sin yeso.**\n";
+  s += "\n## Cómo sigue\n\n";
+  s += tam <= 100
+    ? "- Tanda chica: se seca rápido, revisá la humedad cada 2 días.\n- Volteá una vez por día los primeros 3 días.\n"
+    : "- Tanda grande: si pasa de 45 °C, volteá.\n- Volteá dos veces por día los primeros 7 a 10 días.\n";
+  s += "- Tapado con lona o media sombra, a la sombra.\n- Listo en 15 a 20 días: frío, seco y con olor dulzón.\n";
+  s += "\n## Para qué sirve\n\nEs un abono fermentado con microorganismos: se usa como enmienda, mezclado o en superficie, no como el compost de huerta.\n";
+  document.getElementById('txtK').value = s;
+}
+
+function genTexto(cual, r1, r2, kgF, seco, N, C, agua, volFinal, tacho, cnNom){
+  const hoy = new Date().toLocaleDateString('es-AR');
+  const esC = cual === 'c';
+  const filas = esC ? filasC : filasB;
+  const cargados = filas.filter(function(f){ return (parseFloat(f.kg)||0) > 0; });
+  const id = esC ? 'txtC' : 'txtB';
+  let s = esC ? "# Receta de compostaje\n\n**Fecha:** " + hoy + "\n\n" : "# Receta de biol anaerobio\n\n**Fecha:** " + hoy + "\n\n";
+  if(!cargados.length){ document.getElementById(id).value = s + "_Sin materiales cargados._\n"; return; }
+  s += "## Materiales\n\n| Material | Tipo | kg o L | kg secos | %N | C/N |\n|---|---|---|---|---|---|\n";
+  for(const f of cargados){
+    const kg = parseFloat(f.kg)||0, cn = parseFloat(f.cn)||0;
+    const m = esC ? (MATC[f.nombre]||[50,1,25]) : (MATB[f.nombre]||[50,1,25]);
+    const sec = kg*(1 - m[0]/100);
+    const fconv = (m[3] === undefined ? 1 : m[3]);
+    const cnEf = cn*fconv;
+    const tipo = cn <= 0 ? '-' : (cnEf < 20 ? 'verde (N)' : (cnEf <= 30 ? 'equilibrado' : 'marrón (C)'));
+    s += "| " + f.nombre + " | " + tipo + " | " + kg + " | " + sec.toFixed(1) + " | " + f.n + " | " + cn + (fconv < 1 ? " (efectivo " + cnEf.toFixed(0) + ")" : "") + " |\n";
+  }
+  s += "\n## Resultado\n\n";
+  if(esC){
+    s += "- **C/N efectivo:** " + r1.toFixed(1) + ":1 (ideal 25 a 35) — el que cuenta, descontando el carbono que no se degrada\n";
+    if(cnNom && Math.abs(cnNom - r1) > 1.5) s += "- **C/N nominal:** " + cnNom.toFixed(1) + ":1 (lo que da sin descontar la fibra)\n";
+    s += "- **Humedad de la mezcla:** " + r2.toFixed(0) + " % — el ideal del compost va de 50 a 60% durante todo el proceso\n";
+    s += "- **Kg frescos:** " + kgF.toFixed(1) + " — **kg secos:** " + seco.toFixed(1) + "\n";
+  } else {
+    s += "- **C/N efectivo:** " + r1.toFixed(1) + ":1 (el anaerobio trabaja entre 20 y 30) — el que cuenta, en líquido la fibra casi no se degrada\n";
+    if(cnNom && Math.abs(cnNom - r1) > 1.5) s += "- **C/N nominal:** " + cnNom.toFixed(1) + ":1\n";
+    s += "- **Sólidos:** " + r2.toFixed(0) + " % (ideal 10 a 20)\n";
+    s += "- **Agua a agregar:** " + (agua > 0.5 ? agua.toFixed(0) + " litros" : "ya está") + "\n";
+    s += "- **Volumen final de la mezcla:** " + volFinal.toFixed(0) + " L en un tacho de " + tacho + " L (" + (volFinal/tacho*100).toFixed(0) + "%)\n";
+    s += "- **Kg frescos:** " + kgF.toFixed(1) + " — **kg secos:** " + seco.toFixed(1) + "\n";
+  }
+  s += "- **Nitrógeno total:** " + (N*1000).toFixed(0) + " g — **carbono total:** " + C.toFixed(2) + " kg\n\n";
+  s += "**Veredicto:** " + document.getElementById(esC ? 'cVeredicto' : 'bVeredicto').textContent + "\n\n";
+  const ar = document.getElementById(esC ? 'cArreglo' : 'bArreglo').textContent.trim();
+  if(ar) s += "## Para equilibrar\n\n" + ar + "\n\n";
+  if(esC){
+    s += "## Cómo seguir\n\n- Si no calienta, primero mirá el agua: es lo más común. Después, el nitrógeno. Y si la pila es chica, el volumen.\n- Si huele a amoníaco: sobra nitrógeno, agregá material seco.\n- Si está seca: regar volteando, por capas.\n- Está listo cuando no calienta más, huele a tierra mojada y no se reconocen los materiales.\n\n";
+  } else {
+    s += "## Cómo seguir\n\n- Cerrarlo hermético y a la sombra, 30 a 90 días.\n- Olor a fermento agrio = bien. A podrido = se arruinó.\n- pH entre 6,5 y 7,5.\n- Colarlo antes de usar y guardarlo tapado.\n\n";
+  }
+  s += "_Calculado con la calculadora (valores de referencia editables)._\n";
+  document.getElementById(id).value = s;
+}
+
+// ---------- compartir: link con la receta adentro, y texto para consultar a una IA ----------
+function copiarParaIA(cual){
+  const esC = cual === 'c', esK = cual === 'k';
+  const encabezado = (esC ? 'Te paso una receta de compostaje' : (esK ? 'Te paso una receta de bocashi (abono fermentado)' : 'Te paso una receta de biol anaerobio')) +
+    ' que armé con una calculadora de C/N y humedad. Revisá los números y la receta, y decime qué ajustarías, qué está mal y qué falta. ' +
+    'Contestá concreto.\n\n' +
+    'Datos de la calculadora: los materiales, sus kilos, su humedad, su %N y su C/N son valores de referencia editables. ' +
+    'El C/N se calculó pasando todo a materia seca y dividiendo el carbono total por el nitrógeno total.\n\n';
+  const txt = encabezado + document.getElementById(esC ? 'txtC' : (esK ? 'txtK' : 'txtB')).value;
+  copiarTexto(txt);
+  const av = document.getElementById(esC ? 'avisoLC' : (esK ? 'avisoK' : 'avisoLB'));
+  if(av){ av.textContent = 'copiado, pegalo en la IA'; setTimeout(function(){ av.textContent = ''; }, 2500); }
+}
+function copiarTexto(txt){
+  const ta = document.createElement('textarea');
+  ta.value = txt;
+  ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try{ document.execCommand('copy'); }catch(e){}
+  if(typeof navigator !== 'undefined' && navigator.clipboard) navigator.clipboard.writeText(txt).catch(function(){});
+  document.body.removeChild(ta);
+}
+function exportar(cual){
+  const id = cual === 'c' ? 'txtC' : 'txtB';
+  const txt = document.getElementById(id).value;
+  if(!txt || typeof Blob === 'undefined') return;
+  const hoy = new Date().toISOString().slice(0,10);
+  const nombre = cual === 'c' ? 'compostaje' : 'biol';
+  const blob = new Blob([txt], {type:'text/markdown;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = nombre + " - receta " + hoy + ".md";
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+function copiar(cual){
+  const id = cual === 'c' ? 'txtC' : 'txtB', av = cual === 'c' ? 'avisoC' : 'avisoB';
+  const ta = document.getElementById(id);
+  ta.select();
+  try{ document.execCommand('copy'); }catch(e){}
+  if(typeof navigator !== 'undefined' && navigator.clipboard) navigator.clipboard.writeText(ta.value).catch(function(){});
+  const e = document.getElementById(av);
+  if(e){ e.textContent = 'copiado'; setTimeout(function(){ e.textContent = ''; }, 2000); }
+}
+
+escala('cEscala', 5, 80, [5,15,25,30,35,40,60,80]);
+escala('bEscala', 10, 60, [10,15,20,25,30,40,50,60]);
+// la barra se pinta con los cortes reales (los mismos que usa el texto)
+pintarBarra('cZonas', 5, 80, [[5,15,'#c62828'],[15,25,'#f9a825'],[25,35,'#2e7d32','ideal'],[35,50,'#f9a825'],[50,80,'#c62828']]);
+pintarBarra('bZonas', 10, 60, [[10,15,'#c62828'],[15,20,'#f9a825'],[20,30,'#2e7d32','ideal'],[30,40,'#f9a825'],[40,60,'#c62828']]);
+reiniciarC();
+reiniciarK(); reiniciarB();
+</script>
+
+        <p class="creditos">
+          Esta calculadora la armamos entre los tres, conversando y corrigiendo caso por caso:
+          <b>Franco</b> (las preguntas y el campo), <b>DeepSeek</b> y <b>Hermes Agent</b> (el código, las cuentas y las correcciones).
+          Los valores de la tabla son de referencia y se pueden editar.
+        </p>
+    </div>
+</MainLayouts>
+
+<script is:inline>
+
+const MATC = {
+  "Estiércol de vaca (fresco)":   [80, 0.55, 22, 1],
+  "Estiércol de vaca (seco)":     [20, 1.70, 20, 1],
+  "Estiércol de gallina":         [65, 2.00, 8, 1],
+  "Estiércol de caballo":         [68, 0.60, 25, 1],
+  "Estiércol de oveja":           [65, 0.90, 20, 1],
+  "Estiércol de cabra (fresco)":  [60, 1.80, 18, 1],
+  "Estiércol de cabra (seco)":    [20, 1.80, 18, 1],
+  "Estiércol de cerdo":           [70, 2.00, 13, 1],
+  "Estiércol de cerdo (seco deshidratado)": [12, 2.50, 11, 1],
+  "Restos de cocina / fruta":     [85, 1.20, 18, 1],
+  "Pasto o césped fresco":        [80, 0.90, 20, 1],
+  "Pasto seco / rastrojo":        [15, 0.70, 80, 0.7],
+  "Hojas secas":                  [30, 0.80, 60, 0.6],
+  "Paja de cereal":               [15, 0.60, 90, 0.7],
+  "Aserrín (madera blanda)":      [20, 0.10, 400, 0.3],
+  "Viruta":                       [20, 0.10, 400, 0.3],
+  "Cartón trozado":               [10, 0.10, 300, 0.5],
+  "Borra de café":                [65, 2.00, 20, 1],
+  "Ceniza de madera":             [5,  0.00, 0, 0],
+  "Humus de lombriz":             [40, 1.50, 12, 1]
+};
+const MATB = {
+  "Bosta de cerdo":               [70, 2.00, 13, 1],
+  "Bosta de vaca":                [80, 0.55, 22, 1],
+  "Bosta de gallina":             [65, 2.00, 8, 1],
+  "Bosta de cabra":               [60, 1.80, 18, 1],
+  "Malezas / pasto verde":        [80, 0.90, 20, 1],
+  "Restos de cocina / fruta":     [85, 1.20, 18, 1],
+  "Hojas secas otoñales":         [30, 0.80, 60, 0.2],
+  "Pasto seco / rastrojo":        [15, 0.70, 80, 0.3],
+  "Paja":                         [15, 0.60, 90, 0.2],
+  "Borra de café":                [65, 2.00, 20, 1],
+  "Leche o suero":                [88, 0.50, 25, 1],
+  "Humus de lombriz":             [40, 1.50, 12, 1],
+  "Melaza o azúcar":              [25, 0.80, 30, 1],
+  "Inóculo (tierra de monte)":     [30, 0.30, 15, 0.8],
+  "Biol viejo (arranque)":        [95, 0.30, 15, 1],
+  "Biochar":                      [10, 0.60, 0, 0],
+  "Ceniza de madera":             [5,  0.00, 0, 0],
+  "Arcilla de la zona":           [20, 0.10, 0, 0]
+};
+const OBJC = 30, OBJB = 25, HMINC = 50, HMAXC = 60, SOLMIN = 10, SOLMAX = 20;
+
+let filasC = [], filasB = [];
+function nuevaC(n, kg){ const m = MATC[n] || [50,1,25]; return {nombre:n, kg:kg||"", hum:m[0], n:m[1], cn:m[2]}; }
+function nuevaB(n, kg){ const m = MATB[n] || [50,1,25]; return {nombre:n, kg:kg||"", n:m[1], cn:m[2]}; }
+
+function modo(m){
+  document.getElementById('secCompost').classList.toggle('oculto', m !== 'compost');
+  document.getElementById('secBiol').classList.toggle('oculto', m !== 'biol');
+  document.getElementById('secBocashi').classList.toggle('oculto', m !== 'bocashi');
+  document.getElementById('btnCompost').classList.toggle('on', m === 'compost');
+  document.getElementById('btnBiol').classList.toggle('on', m === 'biol');
+  document.getElementById('btnBocashi').classList.toggle('on', m === 'bocashi');
+}
+
+function chip(cn){ if(cn <= 0) return ''; return cn < 20 ? '<span class="chip verde">verde</span>' : (cn <= 30 ? '<span class="chip amar">equilibrado</span>' : '<span class="chip marron">marrón</span>'); }
+function options(lista, sel){ return Object.keys(lista).map(k=>'<option value="' + k + '"' + (k===sel?' selected':'') + '>' + k + '</option>').join(''); }
+
+function agregarC(n){ filasC.push(nuevaC(n || "Restos de cocina / fruta")); dibujarC(); }
+function presetC(k){ const p = {vaca:"Estiércol de vaca (fresco)", vegetal:"Restos de cocina / fruta", seco:"Hojas secas"}; agregarC(p[k]); }
+function borrarC(i){ filasC.splice(i,1); dibujarC(); }
+function reiniciarC(){ filasC = [nuevaC("Estiércol de vaca (fresco)"), nuevaC("Hojas secas")]; dibujarC(); }
+function setC(i,k,v){
+  filasC[i][k] = v;
+  if(k === "nombre"){ const m = MATC[v] || [50,1,25]; filasC[i].hum = m[0]; filasC[i].n = m[1]; filasC[i].cn = m[2]; dibujarC(); return; }
+  calcularC();
+}
+function dibujarC(){
+  document.getElementById('filasC').innerHTML = filasC.map(function(f,i){ return '<tr>' +
+    '<td><select onchange="setC(' + i + ',\'nombre\',this.value)">' + options(MATC, f.nombre) + '</select></td>' +
+    '<td class="tipo">' + chip(parseFloat(f.cn)||0) + '</td>' +
+    '<td><input type="number" min="0" step="0.1" value="' + f.kg + '" placeholder="0" oninput="setC(' + i + ',\'kg\',this.value)"></td>' +
+    '<td><input type="number" min="0" max="100" value="' + f.hum + '" oninput="setC(' + i + ',\'hum\',this.value)"></td>' +
+    '<td><input type="number" min="0" step="0.05" value="' + f.n + '" oninput="setC(' + i + ',\'n\',this.value)"></td>' +
+    '<td><input type="number" min="0" value="' + f.cn + '" oninput="setC(' + i + ',\'cn\',this.value)"></td>' +
+    '<td><button class="del" onclick="borrarC(' + i + ')">✕</button></td></tr>'; }).join("");
+  calcularC();
+}
+
+function calcularC(){
+  const g = function(id){ return document.getElementById(id); };
+  let kgF = 0, seco = 0, N = 0, C = 0, Cef = 0;
+  for(const f of filasC){
+    const kg = parseFloat(f.kg) || 0; if(kg <= 0) continue;
+    const m = MATC[f.nombre] || [50,1,25,1];
+    const fr = (m[3] === undefined ? 1 : m[3]);
+    const h = Math.min(100, Math.max(0, parseFloat(f.hum)||0))/100;
+    const pcN = Math.max(0, parseFloat(f.n)||0)/100;
+    const cn = Math.max(0, parseFloat(f.cn)||0);
+    const s = kg*(1-h), n = s*pcN;
+    kgF += kg; seco += s; N += n; C += n*cn; Cef += n*cn*fr;
+  }
+  g('cKg').textContent = kgF ? kgF.toFixed(1) + " kg" : "—";
+  g('cSeco').textContent = seco ? seco.toFixed(1) + " kg" : "—";
+  g('cN').textContent = N ? (N*1000).toFixed(0) + " g" : "—";
+  if(!seco || !N){
+    g('cCN').textContent = "—"; g('cHum').textContent = "—"; g('cAguja').style.left = "50%";
+    g('cVeredicto').className = "verdict"; g('cVeredicto').textContent = "Cargá algún material para empezar.";
+    g('cArreglo').innerHTML = ""; g('txtC').value = ""; return;
+  }
+  const cnNom = C/N;
+  const cnMix = Cef > 0 ? Cef/N : cnNom;   // el efectivo: lo que los microbios realmente ven
+  const humMix = (1 - seco/kgF)*100;
+  const difCn = Math.abs(cnMix - cnNom) > 1.5;
+  g('cCN').innerHTML = cnMix.toFixed(1) + ":1" + (difCn ? " <small style=\"color:#666\">(nominal " + cnNom.toFixed(1) + ")</small>" : "");
+  let estado = "", col = "#2e7d32";
+  if(humMix > HMAXC){ estado = "pasada"; col = "#c62828"; } else if(humMix < HMINC){ estado = "seca"; col = "#f9a825"; }
+  g('cHum').innerHTML = humMix.toFixed(0) + " % <small style=\"color:" + col + "\">(" + (estado || "en rango") + ")</small>";
+  g('cAguja').style.left = posGauge(cnMix, 5, 80) + "%";
+
+  let v = g('cVeredicto');
+  if(cnMix < 15){ v.className = "verdict bad"; v.textContent = "Te sobra nitrógeno. C/N " + cnMix.toFixed(1) + ":1 — abajo de 15 se pierde como amoníaco."; }
+  else if(cnMix < 25){ v.className = "verdict warn"; v.textContent = "Un poco bajo. C/N " + cnMix.toFixed(1) + ":1 — sirve, pero conviene subir un poco el carbono."; }
+  else if(cnMix <= 35){
+    if(humMix < HMINC - 3){ v.className = "verdict warn"; v.textContent = "El C/N está en el rango justo (" + cnMix.toFixed(1) + ":1), pero la humedad no: " + humMix.toFixed(0) + "%. Primero humedeces, después a compostar."; }
+    else if(humMix > HMAXC + 3){ v.className = "verdict warn"; v.textContent = "El C/N está bien (" + cnMix.toFixed(1) + ":1), pero está pasada de agua: " + humMix.toFixed(0) + "%. Agregá material seco y volteá."; }
+    else { v.className = "verdict ok"; v.textContent = "Está en el rango justo. C/N " + cnMix.toFixed(1) + ":1. Con la humedad en " + humMix.toFixed(0) + "%, a compostar."; }
+  }
+  else if(cnMix <= 50){ v.className = "verdict warn"; v.textContent = "Un poco alto. C/N " + cnMix.toFixed(1) + ":1 — va a compostar lento; se puede agregar nitrógeno."; }
+  else { v.className = "verdict bad"; v.textContent = "Te sobra carbono. C/N " + cnMix.toFixed(1) + ":1 — así casi no se calienta."; }
+
+  let html = "";
+  if(Math.abs(cnMix - OBJC) > 3){
+    const opciones = ["Restos de cocina / fruta","Pasto o césped fresco","Estiércol de gallina","Estiércol de vaca (fresco)",
+                      "Estiércol de cerdo","Estiércol de vaca (seco)","Hojas secas","Pasto seco / rastrojo",
+                      "Aserrín (madera blanda)","Cartón trozado","Paja de cereal"];
+    const sirven = [], vanMal = [];
+    for(const k of opciones){
+      const m = MATC[k], h = m[0], pcN = m[1], cn = m[2]*(m[3] === undefined ? 1 : m[3]);
+      if(Math.abs(cn - OBJC) < 1e-9) continue;
+      const nNec = (OBJC*N - Cef)/(cn - OBJC);
+      const kg = nNec/((1 - h/100)*(pcN/100));
+      if(kg > 0.01 && kg < 1e6) sirven.push({k:k, kg:kg}); else vanMal.push(k);
+    }
+    sirven.sort(function(a,b){ return a.kg-b.kg; });
+    if(sirven.length){
+      html = "<b>Para llevar el C/N a 30:1</b><br>" + sirven.slice(0,3).map(function(s){ return "• " + s.kg.toFixed(1) + " kg de <b>" + s.k + "</b>"; }).join("<br>") +
+             "<br><span style=\"color:#666;font-size:12px\">Se calcula con los kg frescos, tal como los pesás.</span>";
+    } else html = "<b>Con estos materiales no llegás a 30:1.</b> ";
+    if(cnMix > OBJC){
+      html += "<br><span style=\"font-size:13px\">Estás por encima del objetivo, así que necesitás un material con C/N <b>menor</b> a 30, o sea de los verdes." +
+              (vanMal.length ? " Los que tenés cargados no sirven para esto: " + vanMal.slice(0,4).join(", ") + " ya están en 30 o por encima." : "") + "</span>";
+    } else {
+      html += "<br><span style=\"font-size:13px\">Estás por debajo del objetivo, así que necesitás un material con C/N <b>mayor</b> a 30, o sea de los secos." +
+              (vanMal.length ? " Los verdes y los estiércoles ya están por debajo de 30, así que no te van a subir el ratio." : "") + "</span>";
+    }
+  }
+  // agua en litros, igual que en el biol
+  const humObj = (HMINC + HMAXC)/2/100;               // 55 %
+  const aguaC = Math.max(0, seco/(1 - humObj) - kgF); // litros a agregar
+  if(humMix > HMAXC + 3) html += "<br><br><b>Humedad de tu mezcla:</b> " + humMix.toFixed(0) + "%, está pasada (el ideal es 50 a 60). Agregá material seco y volteá.";
+  else if(humMix < HMINC - 3) html += "<br><br><b>Humedad de tu mezcla:</b> " + humMix.toFixed(0) + "%, está seca. Para llevarla al 55% necesitás unos <b>" + aguaC.toFixed(0) +
+        " litros de agua</b> sobre estos " + kgF.toFixed(0) + " kg. <b>El aserrín tarda en absorber</b>: si podés, humedecelo un día antes. " +
+        "Va por capas, regando y volteando. Chequeo con el puño: tiene que salir una o dos gotas, no un chorro.";
+  else html += "<br><br><b>Humedad de tu mezcla:</b> " + humMix.toFixed(0) + "%, está en rango. Se mantiene durante todo el proceso: reponé lo que se evapora volteando y regando por capas.";
+  // volumen mínimo para que caliente
+  if(kgF < 300){
+    html += "<br><br><b>Tamaño de la pila:</b> con " + kgF.toFixed(0) + " kg frescos queda chica para levantar temperatura. Apuntá a un metro cúbico " +
+            "(más o menos 300 a 500 kg de mezcla húmeda) para que caliente e higienice. Si no llegás, igual compostea, pero más lento y sin pasteurizar.";
+  } else html += "<br><br><b>Tamaño de la pila:</b> " + kgF.toFixed(0) + " kg es buen volumen: con eso levanta temperatura.";
+  // fibra del aserrín
+  if(filasC.some(function(f){ return ((parseFloat(f.kg)||0) > 0) && (f.nombre.indexOf("Aserrín") >= 0 || f.nombre.indexOf("Viruta") >= 0); })){
+    html += "<br><br><b>Si usás aserrín o viruta:</b> el 400 de la tabla es el valor en papel. La lignina de la madera se degrada lento, así que el C/N real baja más despacio y el aserrín puede quedar meses sin descomponerse, con astillas en el producto final. " +
+            "Conviene el aserrín fino, de varias maderas, y mezclar una parte con un marrón más blando como paja o poda triturada.";
+  }
+  // sanidad si hay cerdo
+  if(filasC.some(function(f){ return ((parseFloat(f.kg)||0) > 0) && f.nombre.indexOf("cerdo") >= 0; })){
+    html += "<br><br><b>Sanidad con estiércol de cerdo:</b> aunque esté seco, puede traer patógenos y parásitos. Para que el compost sea seguro la pila tiene que llegar a <b>55 °C o más varios días seguidos</b>, " +
+            "volteando para que todo el material pase por el centro. Si va a una huerta de consumo, dejalo madurar bien antes de aplicar.";
+  }
+  g('cArreglo').innerHTML = html;
+  queHacer('c', cnMix, humMix, kgF, seco);
+  genTexto('c', cnMix, humMix, kgF, seco, N, C, 0, kgF, 0, cnNom);
+}
+
+function agregarB(n){ filasB.push(nuevaB(n || "Malezas / pasto verde")); dibujarB(); }
+function presetB(k){ const p = {bosta:"Bosta de cerdo", verde:"Malezas / pasto verde", seco:"Hojas secas otoñales", leche:"Leche o suero", melaza:"Melaza o azúcar"}; agregarB(p[k]); }
+function borrarB(i){ filasB.splice(i,1); dibujarB(); }
+function reiniciarB(){ filasB = [nuevaB("Bosta de cerdo"), nuevaB("Malezas / pasto verde"), nuevaB("Hojas secas otoñales")]; dibujarB(); }
+function setB(i,k,v){
+  filasB[i][k] = v;
+  if(k === "nombre"){ const m = MATB[v] || [50,1,25]; filasB[i].n = m[1]; filasB[i].cn = m[2]; dibujarB(); return; }
+  calcularB();
+}
+function dibujarB(){
+  document.getElementById('filasB').innerHTML = filasB.map(function(f,i){ return '<tr>' +
+    '<td><select onchange="setB(' + i + ',\'nombre\',this.value)">' + options(MATB, f.nombre) + '</select></td>' +
+    '<td class="tipo">' + chip(parseFloat(f.cn)||0) + '</td>' +
+    '<td><input type="number" min="0" step="0.1" value="' + f.kg + '" placeholder="0" oninput="setB(' + i + ',\'kg\',this.value)"></td>' +
+    '<td><input type="number" min="0" step="0.05" value="' + f.n + '" oninput="setB(' + i + ',\'n\',this.value)"></td>' +
+    '<td><input type="number" min="0" value="' + f.cn + '" oninput="setB(' + i + ',\'cn\',this.value)"></td>' +
+    '<td><button class="del" onclick="borrarB(' + i + ')">✕</button></td></tr>'; }).join("");
+  calcularB();
+}
+
+function calcularB(){
+  const g = function(id){ return document.getElementById(id); };
+  let kgF = 0, seco = 0, N = 0, C = 0, Cef = 0, totCeniza = 0, totInorg = 0;
+  for(const f of filasB){
+    const kg = parseFloat(f.kg) || 0; if(kg <= 0) continue;
+    const m = MATB[f.nombre] || [50,1,25,1];
+    const h = Math.min(100, Math.max(0, m[0]))/100;
+    const pcN = Math.max(0, parseFloat(f.n)||0)/100;
+    const cn = Math.max(0, parseFloat(f.cn)||0);
+    const s = kg*(1-h);
+    kgF += kg; seco += s;
+    if(cn > 0){ const n = s*pcN; N += n; C += n*cn; Cef += n*cn*(m[3] === undefined ? 1 : m[3]); }
+    if(f.nombre.indexOf("Ceniza") >= 0) totCeniza += kg;
+    if(f.nombre.indexOf("Biochar") >= 0 || f.nombre.indexOf("Arcilla") >= 0) totInorg += kg;
+  }
+  const tacho = Math.max(1, parseFloat(g('bTacho').value) || 200);
+  const aguaPuesta = Math.max(0, parseFloat(g('bAgua').value) || 0);
+  g('bAguja').style.left = "50%";
+  if(!seco || !N){
+    g('bCN').textContent = "—"; g('bSolidos').textContent = "—"; g('bAguaFalta').textContent = "—"; g('bUso').textContent = "—";
+    g('bVeredicto').className = "verdict"; g('bVeredicto').textContent = "Cargá algún material para empezar.";
+    g('bArreglo').innerHTML = ""; g('txtB').value = ""; return;
+  }
+  const cnNom = C/N;
+  const cnMix = Cef > 0 ? Cef/N : cnNom;
+  const solObj = (SOLMIN + SOLMAX)/2;
+  const totalObj = seco/(solObj/100);
+  const aguaNecesaria = Math.max(0, totalObj - kgF);          // lo que pide la dilución
+  const aguaMaxFisica = Math.max(0, tacho - kgF - aguaPuesta); // lo que entra en el tacho
+  const noEntra = (kgF + aguaPuesta) > tacho;                  // los materiales solos ya se pasan
+  const aguaRecomendada = Math.min(aguaNecesaria, aguaMaxFisica);
+  const aguaFaltante = Math.max(0, aguaRecomendada - aguaPuesta);
+  const faltaEspacio = (!noEntra) && (aguaNecesaria > aguaMaxFisica + 0.5);
+  const solidos = seco/Math.max(0.001, (kgF + aguaPuesta))*100;
+  const usoIdeal = (kgF + aguaPuesta + aguaRecomendada)/tacho*100;
+  const usoReal = (kgF + aguaPuesta)/tacho*100;
+
+  const ccol = (cnMix < 20) ? "#f9a825" : (cnMix <= 30 ? "#2e7d32" : "#c62828");
+  g('bCN').innerHTML = cnMix.toFixed(1) + ":1" + (Math.abs(cnMix - cnNom) > 1.5 ? " <small style=\"color:#666\">(nominal " + cnNom.toFixed(1) + ")</small>" : "") + " <small style=\"color:" + ccol + "\">" + (cnMix < 20 ? "(bajo)" : (cnMix <= 30 ? "(en rango)" : "(alto)")) + "</small>";
+  const scol = (solidos < SOLMIN) ? "#f9a825" : (solidos <= SOLMAX ? "#2e7d32" : "#c62828");
+  g('bSolidos').innerHTML = solidos.toFixed(0) + " % <small style=\"color:" + scol + "\">(" + (solidos < SOLMIN ? "aguado" : (solidos <= SOLMAX ? "en rango" : "muy espeso")) + ")</small>";
+  g('bAguaFalta').innerHTML = aguaFaltante > 0.5 ? aguaFaltante.toFixed(0) + " L" : "<small>ya está</small>";
+  if(noEntra) g('bUso').innerHTML = usoReal.toFixed(0) + " % <small style=\"color:#c62828\">(no entra)</small>";
+  else if(aguaPuesta > aguaMaxFisica + 0.5) g('bUso').innerHTML = usoReal.toFixed(0) + " % <small style=\"color:#c62828\">(pasado)</small>";
+  else g('bUso').innerHTML = usoIdeal.toFixed(0) + " % <small style=\"color:" + (usoIdeal < 70 ? "#f9a825" : "#2e7d32") + "\">(con el agua)</small>";
+  g('bAguja').style.left = posGauge(cnMix, 10, 60) + "%";
+
+  let v = g('bVeredicto');
+  if(cnMix < 15){ v.className = "verdict bad"; v.textContent = "Muy cargado de nitrógeno (C/N " + cnMix.toFixed(1) + "). Se puede, pero se pierde nitrógeno como amoníaco."; }
+  else if(cnMix < 20){ v.className = "verdict warn"; v.textContent = "Un poco bajo (C/N " + cnMix.toFixed(1) + "). El anaerobio trabaja mejor entre 20 y 30."; }
+  else if(cnMix <= 30){ v.className = "verdict ok"; v.textContent = "Está en el rango del anaerobio (C/N " + cnMix.toFixed(1) + "). Ahora importa el agua y el hermético."; }
+  else if(cnMix <= 40){ v.className = "verdict warn"; v.textContent = "Un poco alto (C/N " + cnMix.toFixed(1) + "). La fermentación va a ser más lenta."; }
+  else { v.className = "verdict bad"; v.textContent = "Muy cargado de carbono (C/N " + cnMix.toFixed(1) + "). Así fermenta mal y despacio."; }
+
+  let html = "";
+  const usoFinal = usoIdeal;
+  if(noEntra){
+    html += "<b>No entra:</b> con " + kgF.toFixed(0) + " kg de materiales y " + aguaPuesta.toFixed(0) + " L de agua ya estás en " + usoReal.toFixed(0) +
+            "% de un tacho de " + tacho + " L. El tacho es el límite físico: no se puede pasar. Dos caminos: usá un tacho de " +
+            Math.ceil((kgF + aguaPuesta)/0.75) + " L o más, o bajá la receta a " + (tacho/(kgF + aguaPuesta)*100).toFixed(0) +
+            "% de estos materiales (unos " + (kgF*tacho/(kgF + aguaPuesta)).toFixed(0) + " kg en vez de " + kgF.toFixed(0) + ").";
+  } else if(faltaEspacio){
+    html += "<b>Agua:</b> la dilución pide <b>" + aguaNecesaria.toFixed(0) + " L</b>, pero en el tacho de " + tacho + " L solo entran <b>" + aguaMaxFisica.toFixed(0) +
+            " L</b> junto con los materiales. <b>No te da el tacho para esta receta.</b> Con lo que entra te quedás en " + (seco/(kgF + aguaPuesta + aguaMaxFisica)*100).toFixed(0) +
+            "% de sólidos (el ideal es 10 a 20). Dos caminos: un tacho de " + Math.ceil((seco/0.15)/0.75) + " L o más, o bajá la receta a unos " +
+            (tacho*0.75/(seco/0.15)*kgF).toFixed(0) + " kg de estos materiales.";
+  } else if(aguaPuesta > aguaMaxFisica + 0.5){
+    html += "<b>Agua:</b> le cargaste " + aguaPuesta.toFixed(0) + " L y al tacho de " + tacho + " L solo le entran " + aguaMaxFisica.toFixed(0) +
+            " L con estos materiales. Sacá agua o material.";
+  } else if(aguaFaltante > 0.5){
+    html += "<b>Agua:</b> agregá <b>" + aguaFaltante.toFixed(0) + " litros</b> (la receta pide " + aguaNecesaria.toFixed(0) + " L en total para " + kgF.toFixed(0) +
+            " kg de materiales, y ya cargaste " + aguaPuesta.toFixed(0) + " L). Con eso el tacho queda al " + usoIdeal.toFixed(0) + "%.";
+  } else if(solidos > SOLMAX + 2){
+    html += "<b>Agua:</b> está muy espeso (" + solidos.toFixed(0) + "% de sólidos). Agregá agua hasta bajar al 15%: unos " + aguaNecesaria.toFixed(0) + " litros.";
+  } else html += "<b>Agua:</b> " + aguaNecesaria.toFixed(0) + " litros en total, y con lo que cargaste está bien de dilución.";
+  // nivel de llenado: poco volumen = mucho aire arriba
+  if(!noEntra){
+    if(usoFinal < 70){
+      html += "<br><br><b>Nivel de llenado:</b> te queda en " + usoFinal.toFixed(0) + "% del tacho. Con menos del 70% queda mucho aire arriba y el arranque se vuelve aerobio. " +
+              "Achicá el tacho (uno de " + Math.ceil((kgF + aguaPuesta + aguaRecomendada)/0.75) + " L te deja al 75%) o escalá la receta.";
+    } else html += "<br><br><b>Nivel de llenado:</b> " + usoFinal.toFixed(0) + "% del tacho, bien: arriba del 70% queda poco aire.";
+  }
+  // el gas
+  html += "<br><br><b>El gas:</b> si lo cerrás hermético del todo, la fermentación lo va a inflar. Poné una <b>trampa de agua</b>: una manguera desde la tapa hasta una botella con agua, " +
+          "así sale el gas y no entra aire. La otra opción es abrir la tapa un instante cada semana, más simple pero deja entrar algo de oxígeno.";
+  // fibra
+  html += "<br><br><b>Sobre el carbono:</b> en el biol el carbono de la fibra (hojas, paja, aserrín) aporta poco: en líquido y sin aire casi no se degrada. " +
+          "Lo que alimenta de verdad son los azúcares (melaza) y el nitrógeno disponible. Así que si el C/N te da bien por las hojas, tomalo con pinzas.";
+  // inoculo
+  if(!filasB.some(function(f){ return ((parseFloat(f.kg)||0) > 0) && (f.nombre.indexOf("Inóculo") >= 0 || f.nombre.indexOf("Biol viejo") >= 0 || f.nombre.indexOf("tierra") >= 0); })){
+    html += "<br><br><b>Inóculo:</b> no cargaste ninguno. Un balde de tierra de monte o de bosta fresca de vaca arranca la fermentación con los microbios correctos.";
+  }
+  if(Math.abs(cnMix - OBJB) > 4){
+    // en el biol, la melaza (azúcar) es la que sube el C/N efectivo; la fibra casi no cuenta
+    const nom = ["Melaza o azúcar","Bosta de cerdo","Bosta de gallina","Malezas / pasto verde","Leche o suero","Hojas secas otoñales","Pasto seco / rastrojo","Paja"];
+    const sirven = [];
+    for(const k of nom){
+      const m = MATB[k], h = m[0], pcN = m[1], cn = m[2]*(m[3] === undefined ? 1 : m[3]);
+      if(cn <= 0 || Math.abs(cn - OBJB) < 1e-9) continue;
+      const nNec = (OBJB*N - Cef)/(cn - OBJB);
+      const kg = nNec/((1 - h/100)*(pcN/100));
+      if(kg > 0.01 && kg < 1e5) sirven.push({k:k, kg:kg});
+    }
+    sirven.sort(function(a,b){ return a.kg-b.kg; });
+    if(sirven.length){
+      html += "<br><br><b>Para llevar el C/N a 25:</b><br>" + sirven.slice(0,3).map(function(s){ return "• " + s.kg.toFixed(1) + " kg de <b>" + s.k + "</b>"; }).join("<br>");
+    }
+    if(cnMix > OBJB) html += "<br><span style=\"font-size:13px\">Estás por encima: necesitás algo con C/N <b>menor</b> a 25, o sea más nitrogenado.</span>";
+    else html += "<br><span style=\"font-size:13px\">Estás por debajo: necesitás algo con C/N <b>mayor</b> a 25, o sea más seco o más fibroso.</span>";
+  }
+  const volFinal = kgF + aguaPuesta + aguaFaltante;
+  if(filasB.some(function(f){ return ((parseFloat(f.kg)||0) > 0) && f.nombre.indexOf("cerdo") >= 0; })){
+    html += "<br><br><b>Si usás bosta de cerdo:</b> tiene más riesgo sanitario que la de rumiantes (patógenos y parásitos), y si los cerdos comen balanceado puede traer cobre y zinc. " +
+            "Aplicalo diluido, 1 litro en 10 a 20 de agua, al suelo, y no sobre hojas de verdura que se comen crudas cerca de la cosecha.";
+  }
+  if(totCeniza > 0){
+    const pc = totCeniza/volFinal*100;
+    if(pc > 1) html += "<br><br><b>Ceniza:</b> estás en " + pc.toFixed(1) + "% del volumen final. El protocolo pide <b>máximo 1%</b>: sacá un poco, porque sube el pH.";
+    else html += "<br><br><b>Ceniza:</b> " + pc.toFixed(1) + "% del volumen final, dentro del 1% que pide el protocolo.";
+  }
+  if(totInorg > 0){
+    html += "<br><b>Biochar y arcilla:</b> " + (totInorg/volFinal*100).toFixed(1) + "% del volumen final. El biochar va alrededor del 2%.";
+  }
+  g('bArreglo').innerHTML = html;
+  queHacer('b', cnMix, solidos, kgF, seco, usoIdeal);
+  genTexto('b', cnMix, solidos, kgF, seco, N, C, aguaFaltante, volFinal, tacho, cnNom);
+}
+
+function pintarBarra(id, min, max, bandas){
+  // bandas: [desde, hasta, color, etiqueta]
+  const cont = document.getElementById(id);
+  if(!cont || !cont.innerHTML === undefined) {}
+  let h = "";
+  for(const b of bandas){
+    const izq = (b[0] - min)/(max - min)*100, der = (b[1] - min)/(max - min)*100;
+    if(der <= 0 || izq >= 100) continue;
+    const i2 = Math.max(0, izq), d2 = Math.min(100, der);
+    h += '<div class="zona" style="left:' + i2 + '%;width:' + (d2 - i2) + '%;background:' + b[2] + '"></div>';
+    if(b[3]){
+      h += '<div class="zonaLbl" style="left:' + ((i2 + d2)/2) + '%">' + b[3] + '</div>';
+    }
+  }
+  if(cont) cont.innerHTML = h;
+}
+// resume lo que hay que hacer, en orden
+function queHacer(cual, cnMix, segundo, kgF, seco, uso){
+  const esC = cual === 'c';
+  const el = document.getElementById(esC ? 'cHacer' : 'bHacer');
+  if(!el) return;
+  const pasos = [];
+  if(esC){
+    if(segundo < HMINC - 3) pasos.push("Humedecé la pila: está seca. Va por capas, regando y volteando.");
+    else if(segundo > HMAXC + 3) pasos.push("Está pasada de agua: agregá material seco y volteá.");
+    if(cnMix < 15) pasos.push("Sobra nitrógeno: sumá material seco.");
+    else if(cnMix > 40) pasos.push("Sobra carbono: sumá verde o estiércol, o esperá más tiempo.");
+    if(kgF < 300) pasos.push("La pila es chica: junta un metro cúbico para que caliente.");
+  } else {
+    if(uso && uso > 100) pasos.push("No entra en el tacho: achicá la receta o usá uno más grande.");
+    else if(uso && uso < 70) pasos.push("Llenala más (al 70-80%): con menos aire arriba arranca aerobio.");
+    if(segundo > SOLMAX + 2) pasos.push("Está muy espeso: agregá agua.");
+    else if(segundo < SOLMIN - 2) pasos.push("Está muy aguado: agregá material.");
+    if(cnMix < 20) pasos.push("Falta carbono aprovechable: en el biol eso se arregla con melaza o azúcar, no con fibra (las hojas y la paja casi no se degradan en líquido).");
+    else if(cnMix > 30) pasos.push("Sobra carbono: más bosta o más verde, y menos fibra.");
+    pasos.push("Cerrá con trampa de agua y dejalo 30 a 90 días.");
+  }
+  el.innerHTML = pasos.length
+    ? '<div class="qh">Qué hacer</div>' + pasos.map(function(s, i){ return (i+1) + ". " + s; }).join("<br>")
+    : '<div class="qh">Todo en orden</div>Los números están en rango. Ahora lo que manda es el proceso: olor, temperatura y paciencia.';
+}
+function posGauge(cn, min, max){ return (Math.min(max, Math.max(min, cn)) - min)/(max - min)*100; }
+function escala(id, min, max, marcas){
+  document.getElementById(id).innerHTML = marcas.map(function(t){ return '<span style="left:' + ((t-min)/(max-min)*100) + '%">' + t + '</span>'; }).join("");
+}
+
+// ================== BOCASHI ==================
+// marrones y estiércoles que se pueden elegir (humedad %)
+const MARRONES = {
+  "Paja de trigo": 15, "Rastrojo de maíz": 20, "Hojas secas": 12, "Cáscara de arroz": 12,
+  "Aserrín": 20, "Cartón trozado": 8, "Pasto seco": 15, "Viruta": 20
+};
+// en el bocashi va el estiércol seco o ya apilado, no el fresco del día:
+// si va fresco, sale demasiado húmedo y hay que compensar con más paja
+const EXCREMENTOS = {
+  "Estiércol de gallina (seco)": 30, "Estiércol de vaca (seco)": 40,
+  "Estiércol de cabra (seco)": 25, "Estiércol de oveja (seco)": 30,
+  "Estiércol de cerdo (seco deshidratado)": 12, "Estiércol de caballo (seco)": 30
+};
+// filas fijas de la receta: [nombre, % sobre la mezcla, humedad %, es elección?]
+let filasK = [];
+function recetaK(){
+  return [
+    { n:"Paja de trigo",        pc:45, h:MARRONES["Paja de trigo"],   tipo:"marron" },
+    { n:"Estiércol de gallina (seco)", pc:30, h:EXCREMENTOS["Estiércol de gallina (seco)"], tipo:"excr" },
+    { n:"Afrecho o salvado",    pc:10, h:12,  tipo:"" },
+    { n:"Ceniza",               pc:2,  h:5,   tipo:"" },
+    { n:"Carbón o biochar",     pc:2,  h:10,  tipo:"" },
+    { n:"Tierra de monte",      pc:5,  h:20,  tipo:"" },
+    { n:"Azúcar o melaza",      pc:1,  h:10,  tipo:"" },
+    { n:"Levadura de pan",      pc:0.2,h:5,   tipo:"" }
+  ];
+}
+function reiniciarK(){ filasK = recetaK(); dibujarK(); }
+function dibujarK(){
+  if(!filasK.length) filasK = recetaK();
+  const tam = parseFloat(document.getElementById('kTam').value) || 100;
+  const totalPc = filasK.reduce(function(a,f){ return a + (parseFloat(f.pc)||0); }, 0) || 1;
+  let h = '';
+  filasK.forEach(function(f, i){
+    const kg = tam * (parseFloat(f.pc)||0) / totalPc;
+    let selector = '';
+    if(f.tipo === 'marron') selector = '<select onchange="cambiarK(' + i + ', this.value, 1)">' + Object.keys(MARRONES).map(function(k){ return '<option' + (k === f.n ? ' selected' : '') + '>' + k + '</option>'; }).join('') + '</select>';
+    if(f.tipo === 'excr') selector = '<select onchange="cambiarK(' + i + ', this.value, 2)">' + Object.keys(EXCREMENTOS).map(function(k){ return '<option' + (k === f.n ? ' selected' : '') + '>' + k + '</option>'; }).join('') + '</select>';
+    const celda = f.tipo ? selector : ('<b>' + f.n + '</b>');
+    const esAzucar = /Azúcar|melaza/i.test(f.n), esLevadura = /Levadura/i.test(f.n);
+    const cuantos = esAzucar || esLevadura
+      ? '<b>' + (kg*1000).toFixed(0) + ' g</b> <small style="color:#666">(' + kg.toFixed(2) + ' kg)</small>'
+      : '<b>' + kg.toFixed(1) + ' kg</b>';
+    h += '<tr><td>' + celda + '</td>'
+      + '<td><input type="number" step="0.1" value="' + f.pc + '" style="width:70px" oninput="filasK[' + i + '].pc=parseFloat(this.value)||0; dibujarK();"> %</td>'
+      + '<td>' + cuantos + '</td></tr>';
+  });
+  document.getElementById('filasK').innerHTML = h;
+  calcularK();
+}
+function cambiarK(i, valor, cual){
+  filasK[i].n = valor;
+  filasK[i].h = cual === 1 ? MARRONES[valor] : EXCREMENTOS[valor];
+  dibujarK();
+}
+function aplicarTam(){ dibujarK(); }
+function calcularK(){
+  const g = function(id){ return document.getElementById(id); };
+  const tam = parseFloat(g('kTam').value) || 100;
+  const totalPc = filasK.reduce(function(a,f){ return a + (parseFloat(f.pc)||0); }, 0) || 1;
+  let kgF = 0, seco = 0, azucar = 0, levadura = 0;
+  filasK.forEach(function(f){
+    const kg = tam * (parseFloat(f.pc)||0) / totalPc;
+    kgF += kg; seco += kg*(1 - (f.h||0)/100);
+    if(/Azúcar|melaza/i.test(f.n)) azucar += kg;
+    if(/Levadura/i.test(f.n)) levadura += kg;
+  });
+  // el bocashi va más seco que el compost: 35 a 40%
+  const agua = Math.max(0, seco/(1 - 0.38) - kgF);
+  g('kTotal').textContent = kgF.toFixed(0) + ' kg';
+  g('kAzucar').innerHTML = (azucar*1000).toFixed(0) + ' g <small style="color:#666">(' + azucar.toFixed(2) + ' kg)</small>';
+  g('kLevadura').innerHTML = (levadura*1000).toFixed(0) + ' g <small style="color:#666">(' + levadura.toFixed(2) + ' kg)</small>';
+  g('kAgua').innerHTML = agua.toFixed(0) + ' L';
+  // qué hacer, según el tamaño
+  const pasos = [];
+  if(tam <= 100) pasos.push("Tanda chica: se seca rápido. Revisá la humedad cada 2 días y tapala con lona o media sombra.");
+  else pasos.push("Tanda grande: junta calor sola. Si pasa de 45 °C, volteá.");
+  pasos.push(tam <= 100 ? "Volteá una vez por día los primeros 3 días." : "Volteá dos veces por día los primeros 7 a 10 días.");
+  pasos.push("Molé el azúcar en el agua y rociá por capas, mezclando. Prueba del puño: apretás y NO tiene que gotear.");
+  pasos.push("A los 15 a 20 días está: frío, seco y con olor dulzón a fermento.");
+  g('kHacer').innerHTML = '<div class="qh">Qué hacer</div>' + pasos.map(function(s,i){ return (i+1) + '. ' + s; }).join('<br>');
+  g('kVeredicto').innerHTML = 'Tanda de <b>' + kgF.toFixed(0) + ' kg</b> de mezcla. Va con <b>' + agua.toFixed(0) + ' litros</b> de agua, hasta quedar al 38% de humedad (más seco que el compost).';
+  g('kDetalle').innerHTML = '<b>Por qué la proporción no cambia con el tamaño</b><br>El azúcar y la levadura van siempre igual, en proporción a la mezcla: no es que una carrada necesite "más azúcar por kilo". '
+    + 'Lo que cambia es el agua que se evapora (en chico mucho más) y los volteos (en grande hacen falta más días, porque tarda más en enfriar). '
+    + 'Si te queda poca cantidad, igual funciona: fermenta, solo que más lento y más parejo.';
+  genTextoK(kgF, seco, azucar, levadura, agua, tam);
+}
+
+function genTextoK(kgF, seco, azucar, levadura, agua, tam){
+  const hoy = new Date().toLocaleDateString('es-AR');
+  const totalPc = filasK.reduce(function(a,f){ return a + (parseFloat(f.pc)||0); }, 0) || 1;
+  let s = "# Receta de bocashi\n\n**Fecha:** " + hoy + "\n\n**Tamaño de la tanda:** " + kgF.toFixed(0) + " kg de mezcla\n\n## Ingredientes\n\n| Ingrediente | % de la mezcla | Cuánto va |\n|---|---|---|\n";
+  filasK.forEach(function(f){
+    const kg = tam * (parseFloat(f.pc)||0) / totalPc;
+    const cuanto = /Azúcar|melaza|Levadura/i.test(f.n) ? (kg*1000).toFixed(0) + " g" : kg.toFixed(1) + " kg";
+    s += "| " + f.n + " | " + f.pc + " % | " + cuanto + " |\n";
+  });
+  s += "\n## Para armar\n\n";
+  s += "- **Agua:** " + agua.toFixed(0) + " litros, hasta el 38% de humedad (más seco que el compost: prueba del puño, apretás y no gotea)\n";
+  s += "- **Azúcar o melaza:** " + (azucar*1000).toFixed(0) + " g\n- **Levadura:** " + (levadura*1000).toFixed(0) + " g\n";
+  s += "- **Sin sal y sin yeso.**\n";
+  s += "\n## Cómo sigue\n\n";
+  s += tam <= 100
+    ? "- Tanda chica: se seca rápido, revisá la humedad cada 2 días.\n- Volteá una vez por día los primeros 3 días.\n"
+    : "- Tanda grande: si pasa de 45 °C, volteá.\n- Volteá dos veces por día los primeros 7 a 10 días.\n";
+  s += "- Tapado con lona o media sombra, a la sombra.\n- Listo en 15 a 20 días: frío, seco y con olor dulzón.\n";
+  s += "\n## Para qué sirve\n\nEs un abono fermentado con microorganismos: se usa como enmienda, mezclado o en superficie, no como el compost de huerta.\n";
+  document.getElementById('txtK').value = s;
+}
+
+function genTexto(cual, r1, r2, kgF, seco, N, C, agua, volFinal, tacho, cnNom){
+  const hoy = new Date().toLocaleDateString('es-AR');
+  const esC = cual === 'c';
+  const filas = esC ? filasC : filasB;
+  const cargados = filas.filter(function(f){ return (parseFloat(f.kg)||0) > 0; });
+  const id = esC ? 'txtC' : 'txtB';
+  let s = esC ? "# Receta de compostaje\n\n**Fecha:** " + hoy + "\n\n" : "# Receta de biol anaerobio\n\n**Fecha:** " + hoy + "\n\n";
+  if(!cargados.length){ document.getElementById(id).value = s + "_Sin materiales cargados._\n"; return; }
+  s += "## Materiales\n\n| Material | Tipo | kg o L | kg secos | %N | C/N |\n|---|---|---|---|---|---|\n";
+  for(const f of cargados){
+    const kg = parseFloat(f.kg)||0, cn = parseFloat(f.cn)||0;
+    const m = esC ? (MATC[f.nombre]||[50,1,25]) : (MATB[f.nombre]||[50,1,25]);
+    const sec = kg*(1 - m[0]/100);
+    const fconv = (m[3] === undefined ? 1 : m[3]);
+    const cnEf = cn*fconv;
+    const tipo = cn <= 0 ? '-' : (cnEf < 20 ? 'verde (N)' : (cnEf <= 30 ? 'equilibrado' : 'marrón (C)'));
+    s += "| " + f.nombre + " | " + tipo + " | " + kg + " | " + sec.toFixed(1) + " | " + f.n + " | " + cn + (fconv < 1 ? " (efectivo " + cnEf.toFixed(0) + ")" : "") + " |\n";
+  }
+  s += "\n## Resultado\n\n";
+  if(esC){
+    s += "- **C/N efectivo:** " + r1.toFixed(1) + ":1 (ideal 25 a 35) — el que cuenta, descontando el carbono que no se degrada\n";
+    if(cnNom && Math.abs(cnNom - r1) > 1.5) s += "- **C/N nominal:** " + cnNom.toFixed(1) + ":1 (lo que da sin descontar la fibra)\n";
+    s += "- **Humedad de la mezcla:** " + r2.toFixed(0) + " % — el ideal del compost va de 50 a 60% durante todo el proceso\n";
+    s += "- **Kg frescos:** " + kgF.toFixed(1) + " — **kg secos:** " + seco.toFixed(1) + "\n";
+  } else {
+    s += "- **C/N efectivo:** " + r1.toFixed(1) + ":1 (el anaerobio trabaja entre 20 y 30) — el que cuenta, en líquido la fibra casi no se degrada\n";
+    if(cnNom && Math.abs(cnNom - r1) > 1.5) s += "- **C/N nominal:** " + cnNom.toFixed(1) + ":1\n";
+    s += "- **Sólidos:** " + r2.toFixed(0) + " % (ideal 10 a 20)\n";
+    s += "- **Agua a agregar:** " + (agua > 0.5 ? agua.toFixed(0) + " litros" : "ya está") + "\n";
+    s += "- **Volumen final de la mezcla:** " + volFinal.toFixed(0) + " L en un tacho de " + tacho + " L (" + (volFinal/tacho*100).toFixed(0) + "%)\n";
+    s += "- **Kg frescos:** " + kgF.toFixed(1) + " — **kg secos:** " + seco.toFixed(1) + "\n";
+  }
+  s += "- **Nitrógeno total:** " + (N*1000).toFixed(0) + " g — **carbono total:** " + C.toFixed(2) + " kg\n\n";
+  s += "**Veredicto:** " + document.getElementById(esC ? 'cVeredicto' : 'bVeredicto').textContent + "\n\n";
+  const ar = document.getElementById(esC ? 'cArreglo' : 'bArreglo').textContent.trim();
+  if(ar) s += "## Para equilibrar\n\n" + ar + "\n\n";
+  if(esC){
+    s += "## Cómo seguir\n\n- Si no calienta, primero mirá el agua: es lo más común. Después, el nitrógeno. Y si la pila es chica, el volumen.\n- Si huele a amoníaco: sobra nitrógeno, agregá material seco.\n- Si está seca: regar volteando, por capas.\n- Está listo cuando no calienta más, huele a tierra mojada y no se reconocen los materiales.\n\n";
+  } else {
+    s += "## Cómo seguir\n\n- Cerrarlo hermético y a la sombra, 30 a 90 días.\n- Olor a fermento agrio = bien. A podrido = se arruinó.\n- pH entre 6,5 y 7,5.\n- Colarlo antes de usar y guardarlo tapado.\n\n";
+  }
+  s += "_Calculado con la calculadora (valores de referencia editables)._\n";
+  document.getElementById(id).value = s;
+}
+
+// ---------- compartir: link con la receta adentro, y texto para consultar a una IA ----------
+function copiarParaIA(cual){
+  const esC = cual === 'c', esK = cual === 'k';
+  const encabezado = (esC ? 'Te paso una receta de compostaje' : (esK ? 'Te paso una receta de bocashi (abono fermentado)' : 'Te paso una receta de biol anaerobio')) +
+    ' que armé con una calculadora de C/N y humedad. Revisá los números y la receta, y decime qué ajustarías, qué está mal y qué falta. ' +
+    'Contestá concreto.\n\n' +
+    'Datos de la calculadora: los materiales, sus kilos, su humedad, su %N y su C/N son valores de referencia editables. ' +
+    'El C/N se calculó pasando todo a materia seca y dividiendo el carbono total por el nitrógeno total.\n\n';
+  const txt = encabezado + document.getElementById(esC ? 'txtC' : (esK ? 'txtK' : 'txtB')).value;
+  copiarTexto(txt);
+  const av = document.getElementById(esC ? 'avisoLC' : (esK ? 'avisoK' : 'avisoLB'));
+  if(av){ av.textContent = 'copiado, pegalo en la IA'; setTimeout(function(){ av.textContent = ''; }, 2500); }
+}
+function copiarTexto(txt){
+  const ta = document.createElement('textarea');
+  ta.value = txt;
+  ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try{ document.execCommand('copy'); }catch(e){}
+  if(typeof navigator !== 'undefined' && navigator.clipboard) navigator.clipboard.writeText(txt).catch(function(){});
+  document.body.removeChild(ta);
+}
+function exportar(cual){
+  const id = cual === 'c' ? 'txtC' : 'txtB';
+  const txt = document.getElementById(id).value;
+  if(!txt || typeof Blob === 'undefined') return;
+  const hoy = new Date().toISOString().slice(0,10);
+  const nombre = cual === 'c' ? 'compostaje' : 'biol';
+  const blob = new Blob([txt], {type:'text/markdown;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = nombre + " - receta " + hoy + ".md";
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+function copiar(cual){
+  const id = cual === 'c' ? 'txtC' : 'txtB', av = cual === 'c' ? 'avisoC' : 'avisoB';
+  const ta = document.getElementById(id);
+  ta.select();
+  try{ document.execCommand('copy'); }catch(e){}
+  if(typeof navigator !== 'undefined' && navigator.clipboard) navigator.clipboard.writeText(ta.value).catch(function(){});
+  const e = document.getElementById(av);
+  if(e){ e.textContent = 'copiado'; setTimeout(function(){ e.textContent = ''; }, 2000); }
+}
+
+escala('cEscala', 5, 80, [5,15,25,30,35,40,60,80]);
+escala('bEscala', 10, 60, [10,15,20,25,30,40,50,60]);
+// la barra se pinta con los cortes reales (los mismos que usa el texto)
+pintarBarra('cZonas', 5, 80, [[5,15,'#c62828'],[15,25,'#f9a825'],[25,35,'#2e7d32','ideal'],[35,50,'#f9a825'],[50,80,'#c62828']]);
+pintarBarra('bZonas', 10, 60, [[10,15,'#c62828'],[15,20,'#f9a825'],[20,30,'#2e7d32','ideal'],[30,40,'#f9a825'],[40,60,'#c62828']]);
+reiniciarC();
+reiniciarK(); reiniciarB();
+
+</script>
