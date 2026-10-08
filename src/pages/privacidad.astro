@@ -1,0 +1,177 @@
+---
+import MainLayout from '../layouts/MainLayouts.astro'
+---
+
+<MainLayout
+	title="Política de privacidad"
+	descr="Política de privacidad de Hermes, una aplicación personal de un solo usuario. Qué datos accede, dónde se guardan y con quién se comparten: con nadie."
+>
+	<style>
+		.privacidad {
+			max-width: 780px;
+			margin: 0 auto;
+			padding: 6vh 5vw 10vh;
+			line-height: 1.65;
+		}
+		.hoja {
+			background: #ffffff;
+			color: #1c1c1c;
+			border-radius: 10px;
+			padding: 4vh 5vw 5vh;
+			box-shadow: 0 6px 24px #00000040;
+		}
+		.hoja h1 {
+			margin: 0 0 0.4em;
+			font-size: 1.9rem;
+			line-height: 1.2;
+		}
+		.hoja h2 {
+			margin: 1.8em 0 0.5em;
+			font-size: 1.15rem;
+			border-bottom: 1px solid #d8d8d8;
+			padding-bottom: 0.25em;
+		}
+		.hoja p,
+		.hoja li {
+			font-size: 0.98rem;
+		}
+		.hoja ul {
+			padding-left: 1.3em;
+		}
+		.hoja li {
+			margin-bottom: 0.35em;
+		}
+		.fecha {
+			color: #5a5a5a;
+			font-size: 0.88rem;
+			margin-bottom: 2em;
+		}
+		.destacado {
+			background: #f2f6fb;
+			border-left: 4px solid #2f6fb0;
+			padding: 0.9em 1.1em;
+			margin: 1.4em 0;
+			border-radius: 0 6px 6px 0;
+		}
+		.volver {
+			display: inline-block;
+			margin-top: 2.5em;
+			color: #2f6fb0;
+			font-weight: 600;
+			text-decoration: none;
+		}
+		.volver:hover {
+			text-decoration: underline;
+		}
+	</style>
+
+	<div class="privacidad">
+		<div class="hoja">
+			<h1>Política de privacidad</h1>
+			<p class="fecha">Última actualización: 8 de octubre de 2026</p>
+
+			<div class="destacado">
+				<strong>Resumen en una línea:</strong> es una aplicación personal, la usa una sola persona
+				—su propio dueño— y no comparte datos con nadie.
+			</div>
+
+			<h2>1. Qué es esta aplicación</h2>
+			<p>
+				<strong>Hermes</strong> es una aplicación <strong>personal y de un solo usuario</strong>. No es un
+				servicio abierto al público, no permite registrarse, no tiene cuentas de terceros y no se
+				distribuye a otros usuarios. Corre en la computadora de su propio dueño y existe para
+				automatizarle tareas suyas: leer sus vencimientos, y consultar y editar sus propios documentos
+				y planillas.
+			</p>
+			<p>
+				El único titular y usuario de la aplicación es su propietario. No hay otros usuarios, ni
+				invitados, ni acceso compartido.
+			</p>
+
+			<h2>2. A qué datos de Google accede</h2>
+			<p>La aplicación accede <strong>únicamente a los datos de la cuenta de Google de su propio dueño</strong>,
+			y solo a los siguientes:</p>
+			<ul>
+				<li><strong>Google Calendar</strong> — leer y crear eventos propios.</li>
+				<li><strong>Google Drive</strong> — leer y escribir archivos propios.</li>
+				<li><strong>Google Docs</strong> — leer y editar documentos propios.</li>
+				<li><strong>Google Sheets</strong> — leer y editar planillas propias.</li>
+				<li><strong>YouTube</strong> — administrar el canal propio.</li>
+			</ul>
+			<p>
+				La aplicación <strong>no accede al correo electrónico</strong> ni a ningún otro dato fuera de esa
+				lista.
+			</p>
+
+			<h2>3. Para qué se usan esos datos</h2>
+			<p>
+				Para uso exclusivamente personal del dueño de la cuenta. Concretamente: mostrarle sus propios
+				vencimientos, y crear o editar sus propios documentos, planillas y archivos cuando él se lo pide.
+			</p>
+			<p>
+				Los datos <strong>no se usan para publicidad, ni para perfilado, ni para entrenar modelos, ni para
+				ninguna finalidad distinta de la de servirle a su dueño</strong>.
+			</p>
+
+			<h2>4. Dónde se guardan los datos</h2>
+			<p>
+				<strong>Los datos no salen de la cuenta de Google de su dueño.</strong> La aplicación se ejecuta en
+				la computadora del propio titular y consulta la información en el momento.
+			</p>
+			<ul>
+				<li>No hay servidor intermediario.</li>
+				<li>No hay base de datos propia ni copia de los datos en la nube.</li>
+				<li>No hay servicios de terceros involucrados.</li>
+			</ul>
+			<p>
+				Lo único que se guarda localmente es el <strong>permiso de acceso</strong> que Google emite
+				(el <em>token</em>), en el equipo del titular, para no tener que autorizar en cada uso. Ese permiso
+				se puede revocar en cualquier momento.
+			</p>
+
+			<h2>5. Con quién se comparten</h2>
+			<p>
+				<strong>Con nadie.</strong> No hay transferencia, venta, cesión ni comunicación de datos a terceros,
+				por ningún medio ni con ninguna finalidad. No hay anunciantes, ni socios, ni proveedores de
+				analítica, ni rastreo de ningún tipo.
+			</p>
+
+			<h2>6. Uso de las APIs de Google</h2>
+			<p>
+				El uso que esta aplicación hace de la información recibida de las APIs de Google cumple con la
+				<em>Política de datos de usuario de los servicios de API de Google</em>, incluidos los requisitos de
+				<em>Uso limitado</em> (<em>Limited Use</em>). En particular: los datos se usan solo para las
+				funciones visibles de la aplicación, no se transfieren a terceros, no se usan para publicidad y no
+				los lee ninguna persona fuera del titular de la cuenta.
+			</p>
+			<p>
+				<i>This application's use of information received from Google APIs adheres to the Google API
+				Services User Data Policy, including the Limited Use requirements.</i>
+			</p>
+
+			<h2>7. Cómo revocar el acceso</h2>
+			<p>El titular de la cuenta puede cortar el acceso cuando quiera, en cualquier momento:</p>
+			<ul>
+				<li>Entrando a <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">myaccount.google.com/permissions</a>, buscando la aplicación y quitando el permiso.</li>
+				<li>O borrando el permiso guardado en su propia computadora.</li>
+			</ul>
+			<p>
+				Al revocar el permiso, la aplicación deja de tener acceso de inmediato.
+			</p>
+
+			<h2>8. Cambios en esta política</h2>
+			<p>
+				Si esta política cambia, se actualiza la fecha del encabezado. No hay mucho que cambiar: mientras
+				la aplicación siga siendo de un solo usuario, esta política va a decir lo mismo.
+			</p>
+
+			<h2>9. Contacto</h2>
+			<p>
+				Por cualquier consulta sobre esta política o sobre el manejo de datos:
+				<a href="mailto:H49514302@gmail.com">H49514302@gmail.com</a>.
+			</p>
+
+			<a class="volver" href="/">← Volver al inicio</a>
+		</div>
+	</div>
+</MainLayout>
