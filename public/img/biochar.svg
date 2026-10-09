@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="Biochar: cómo convertir la leña que no sirve en suelo vivo">
+	<defs>
+		<linearGradient id="fondo" x1="0" y1="1" x2="0" y2="0">
+			<stop offset="0%" stop-color="#0c0a09"/>
+			<stop offset="55%" stop-color="#191411"/>
+			<stop offset="100%" stop-color="#2b2118"/>
+		</linearGradient>
+
+		<radialGradient id="brasa" cx="50%" cy="58%" r="55%">
+			<stop offset="0%" stop-color="#ff8a3d" stop-opacity="0.50"/>
+			<stop offset="35%" stop-color="#d9511a" stop-opacity="0.22"/>
+			<stop offset="70%" stop-color="#6d2a0e" stop-opacity="0.08"/>
+			<stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+		</radialGradient>
+
+		<radialGradient id="luzcarbon" cx="50%" cy="70%" r="72%">
+			<stop offset="0%" stop-color="#5a3016"/>
+			<stop offset="45%" stop-color="#241b14"/>
+			<stop offset="100%" stop-color="#0a0806"/>
+		</radialGradient>
+
+		<linearGradient id="filo" x1="0.1" y1="0" x2="0.9" y2="1">
+			<stop offset="0%" stop-color="#ffb273" stop-opacity="0.95"/>
+			<stop offset="45%" stop-color="#c9541a" stop-opacity="0.55"/>
+			<stop offset="100%" stop-color="#3a1d0c" stop-opacity="0.25"/>
+		</linearGradient>
+
+		<linearGradient id="tierra" x1="0" y1="0" x2="0" y2="1">
+			<stop offset="0%" stop-color="#0b0908" stop-opacity="0"/>
+			<stop offset="100%" stop-color="#0b0908" stop-opacity="0.95"/>
+		</linearGradient>
+
+		<pattern id="carbonilla" width="46" height="46" patternUnits="userSpaceOnUse">
+			<circle cx="6" cy="9" r="1.6" fill="#f3c9a2" opacity="0.20"/>
+			<circle cx="30" cy="20" r="1.1" fill="#ffb066" opacity="0.26"/>
+			<circle cx="18" cy="34" r="1.4" fill="#f3c9a2" opacity="0.14"/>
+			<circle cx="41" cy="7" r="0.9" fill="#ffd9b3" opacity="0.18"/>
+			<circle cx="12" cy="43" r="1.2" fill="#ff8a3d" opacity="0.16"/>
+			<circle cx="38" cy="38" r="1.5" fill="#f3c9a2" opacity="0.11"/>
+		</pattern>
+	</defs>
+
+	<!-- fondo -->
+	<rect width="1200" height="675" fill="url(#fondo)"/>
+	<rect width="1200" height="675" fill="url(#carbonilla)"/>
+
+	<!-- brasa de fondo -->
+	<ellipse cx="600" cy="390" rx="480" ry="300" fill="url(#brasa)"/>
+
+	<!-- el trozo de carbon, con las grietas al rojo -->
+	<g transform="translate(600 244)">
+		<!-- el bloque -->
+		<path d="M -172 12 L -108 -80 L -16 -112 L 58 -88 L 164 -30 L 134 42 L 86 100 L -10 116 L -94 106 L -166 52 Z"
+		      fill="url(#luzcarbon)" stroke="url(#filo)" stroke-width="3"/>
+
+		<!-- grietas: primero el halo, despues la linea -->
+		<g stroke-linecap="round" fill="none">
+			<path d="M -108 -80 L -58 -8 L -94 106" stroke="#ff6a1f" stroke-width="14" opacity="0.15"/>
+			<path d="M -108 -80 L -58 -8 L -94 106" stroke="#ffb066" stroke-width="3.4" opacity="0.92"/>
+
+			<path d="M -16 -112 L 12 -24 L 86 100" stroke="#ff6a1f" stroke-width="13" opacity="0.13"/>
+			<path d="M -16 -112 L 12 -24 L 86 100" stroke="#ffab5e" stroke-width="3" opacity="0.85"/>
+
+			<path d="M -58 -8 L 12 -24" stroke="#ff6a1f" stroke-width="12" opacity="0.12"/>
+			<path d="M -58 -8 L 12 -24" stroke="#ff8a3d" stroke-width="2.6" opacity="0.78"/>
+
+			<path d="M 58 -88 L 164 -30" stroke="#ff6a1f" stroke-width="11" opacity="0.11"/>
+			<path d="M 58 -88 L 164 -30" stroke="#ff8a3d" stroke-width="2.2" opacity="0.66"/>
+		</g>
+
+		<!-- ascuas -->
+		<circle cx="-58" cy="-8" r="6.5" fill="#ff8a3d" opacity="0.9"/>
+		<circle cx="-58" cy="-8" r="13" fill="#ff5a10" opacity="0.22"/>
+		<circle cx="12" cy="-24" r="4.6" fill="#ffb066" opacity="0.85"/>
+		<circle cx="86" cy="100" r="3.2" fill="#ff8a3d" opacity="0.7"/>
+	</g>
+
+	<!-- texto -->
+	<g text-anchor="middle" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif">
+		<text x="600" y="466" font-size="118" font-weight="700" letter-spacing="14"
+		      fill="#f8efe6">BIOCHAR</text>
+		<line x1="410" y1="500" x2="790" y2="500" stroke="#c9761f" stroke-width="1.6" opacity="0.75"/>
+		<text x="600" y="546" font-size="31" letter-spacing="2.6" fill="#d9b389">de la poda al suelo, sin pasar por el humo</text>
+	</g>
+
+	<!-- pie de tierra -->
+	<rect y="574" width="1200" height="101" fill="url(#tierra)"/>
+</svg>
